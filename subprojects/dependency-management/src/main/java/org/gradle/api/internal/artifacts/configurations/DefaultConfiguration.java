@@ -29,6 +29,7 @@ import org.gradle.api.internal.DefaultDomainObjectSet;
 import org.gradle.api.internal.artifacts.*;
 import org.gradle.api.internal.artifacts.dsl.dependencies.ProjectFinder;
 import org.gradle.api.internal.artifacts.ivyservice.resolveengine.projectresult.ResolvedProjectConfiguration;
+import org.gradle.api.internal.artifacts.result.ResolverResultsToResolvedConfigurationAdapter;
 import org.gradle.api.internal.file.AbstractFileCollection;
 import org.gradle.api.internal.file.FileSystemSubset;
 import org.gradle.api.internal.project.ProjectInternal;
@@ -66,6 +67,7 @@ public class DefaultConfiguration extends AbstractFileCollection implements Conf
     private final ProjectAccessListener projectAccessListener;
     private final ProjectFinder projectFinder;
     private final ResolutionStrategyInternal resolutionStrategy;
+    private final ResolverResultsToResolvedConfigurationAdapter resolverResultsAdapter;
 
     private final Set<MutationValidator> childMutationValidators = Sets.newHashSet();
     private final MutationValidator parentMutationValidator = new MutationValidator() {
@@ -102,7 +104,8 @@ public class DefaultConfiguration extends AbstractFileCollection implements Conf
                                 DependencyMetaDataProvider metaDataProvider,
                                 ResolutionStrategyInternal resolutionStrategy,
                                 ProjectAccessListener projectAccessListener,
-                                ProjectFinder projectFinder) {
+                                ProjectFinder projectFinder,
+                                ResolverResultsToResolvedConfigurationAdapter resolverResultsAdapter) {
         this.path = path;
         this.name = name;
         this.configurationsProvider = configurationsProvider;
@@ -112,6 +115,7 @@ public class DefaultConfiguration extends AbstractFileCollection implements Conf
         this.resolutionStrategy = resolutionStrategy;
         this.projectAccessListener = projectAccessListener;
         this.projectFinder = projectFinder;
+        this.resolverResultsAdapter = resolverResultsAdapter;
 
         dependencyResolutionListeners = listenerManager.createAnonymousBroadcaster(DependencyResolutionListener.class);
 
@@ -327,7 +331,7 @@ public class DefaultConfiguration extends AbstractFileCollection implements Conf
 
     public ResolvedConfiguration getResolvedConfiguration() {
         resolveNow(InternalState.RESULTS_RESOLVED);
-        return cachedResolverResults.getResolvedConfiguration();
+        return resolverResultsAdapter.toResolvedConfiguration(cachedResolverResults, this);
     }
 
     private void resolveNow(InternalState requestedState) {
@@ -491,7 +495,7 @@ public class DefaultConfiguration extends AbstractFileCollection implements Conf
     private DefaultConfiguration createCopy(Set<Dependency> dependencies, boolean recursive) {
         DetachedConfigurationsProvider configurationsProvider = new DetachedConfigurationsProvider();
         DefaultConfiguration copiedConfiguration = new DefaultConfiguration(path + "Copy", name + "Copy",
-            configurationsProvider, resolver, listenerManager, metaDataProvider, resolutionStrategy.copy(), projectAccessListener, projectFinder);
+            configurationsProvider, resolver, listenerManager, metaDataProvider, resolutionStrategy.copy(), projectAccessListener, projectFinder, resolverResultsAdapter);
         configurationsProvider.setTheOnlyConfiguration(copiedConfiguration);
         // state, cachedResolvedConfiguration, and extendsFrom intentionally not copied - must re-resolve copy
         // copying extendsFrom could mess up dependencies when copy was re-resolved

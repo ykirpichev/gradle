@@ -37,23 +37,21 @@ public class SelfResolvingDependencyResolver implements ArtifactDependencyResolv
     public void resolve(ResolveContext resolveContext,
                         List<? extends ResolutionAwareRepository> repositories,
                         GlobalDependencyResolutionRules metadataHandler,
-                        DefaultResolverResults results) throws ResolveException {
+                        ResolverResults results) throws ResolveException {
         resolver.resolve(resolveContext, repositories, metadataHandler, results);
     }
 
     public void resolveArtifacts(ResolveContext contextInternal,
                                  List<? extends ResolutionAwareRepository> repositories,
                                  GlobalDependencyResolutionRules metadataHandler,
-                                 DefaultResolverResults results) throws ResolveException {
+                                 ResolverResults results) throws ResolveException {
         resolver.resolveArtifacts(contextInternal, repositories, metadataHandler, results);
 
-        ResolvedConfiguration resolvedConfiguration = results.getResolvedConfiguration();
-        Configuration configuration = (Configuration) contextInternal;
-        Set<Dependency> dependencies = configuration.getAllDependencies();
-        CachingDependencyResolveContext resolveContext = new CachingDependencyResolveContext(configuration.isTransitive());
+        Set<Dependency> dependencies = contextInternal.getAllDependencies();
+        CachingDependencyResolveContext resolveContext = new CachingDependencyResolveContext(contextInternal.isTransitive());
         SelfResolvingFilesProvider provider = new SelfResolvingFilesProvider(resolveContext, dependencies);
 
-        results.withResolvedConfiguration(new FilesAggregatingResolvedConfiguration(resolvedConfiguration, provider));
+        //results.withResolvedConfiguration(new FilesAggregatingResolvedConfiguration(resolvedConfiguration, provider));
     }
 
     protected static class SelfResolvingFilesProvider {

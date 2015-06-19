@@ -18,16 +18,15 @@ package org.gradle.api.internal.artifacts.ivyservice.resolveengine;
 import com.google.common.collect.Lists;
 import org.apache.ivy.Ivy;
 import org.gradle.api.Action;
-import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.ResolveException;
 import org.gradle.api.artifacts.component.ComponentIdentifier;
 import org.gradle.api.artifacts.result.ResolvedComponentResult;
-import org.gradle.api.internal.artifacts.ArtifactDependencyResolver;
-import org.gradle.api.internal.artifacts.DefaultResolverResults;
-import org.gradle.api.internal.artifacts.GlobalDependencyResolutionRules;
-import org.gradle.api.internal.artifacts.ResolveContext;
+import org.gradle.api.internal.artifacts.*;
 import org.gradle.api.internal.artifacts.configurations.ResolutionStrategyInternal;
-import org.gradle.api.internal.artifacts.ivyservice.*;
+import org.gradle.api.internal.artifacts.ivyservice.CacheLockingManager;
+import org.gradle.api.internal.artifacts.ivyservice.ContextualArtifactResolver;
+import org.gradle.api.internal.artifacts.ivyservice.IvyContextManager;
+import org.gradle.api.internal.artifacts.ivyservice.LocalComponentFactory;
 import org.gradle.api.internal.artifacts.ivyservice.clientmodule.ClientModuleResolver;
 import org.gradle.api.internal.artifacts.ivyservice.dependencysubstitution.DependencySubstitutionResolver;
 import org.gradle.api.internal.artifacts.ivyservice.ivyresolve.ErrorHandlingArtifactResolver;
@@ -50,7 +49,6 @@ import org.gradle.api.internal.artifacts.repositories.ResolutionAwareRepository;
 import org.gradle.api.internal.cache.BinaryStore;
 import org.gradle.api.internal.cache.Store;
 import org.gradle.api.internal.component.ArtifactType;
-import org.gradle.internal.Factory;
 import org.gradle.internal.component.local.model.LocalComponentMetaData;
 import org.gradle.internal.component.model.*;
 import org.gradle.internal.resolve.resolver.ArtifactResolver;
@@ -105,7 +103,7 @@ public class DefaultDependencyResolver implements ArtifactDependencyResolver {
     public void resolve(final ResolveContext resolveContext,
                         final List<? extends ResolutionAwareRepository> repositories,
                         final GlobalDependencyResolutionRules metadataHandler,
-                        final DefaultResolverResults results) throws ResolveException {
+                        final ResolverResults results) throws ResolveException {
         LOGGER.debug("Resolving {}", resolveContext);
         ivyContextManager.withIvy(new Action<Ivy>() {
             public void execute(Ivy ivy) {
@@ -143,12 +141,13 @@ public class DefaultDependencyResolver implements ArtifactDependencyResolver {
                 ResolvedLocalComponentsResultBuilder localComponentsResultBuilder = new DefaultResolvedLocalComponentsResultBuilder(buildProjectDependencies);
 
                 // Resolve the dependency graph
-                DefaultResolvedArtifactsBuilder artifactsBuilder = new DefaultResolvedArtifactsBuilder();
+                ResolverResultsBuilder resultsBuilder = (ResolverResultsBuilder) results;
+                ResolvedArtifactsBuilder artifactsBuilder = resultsBuilder.getResolvedArtifactsBuilder();
                 builder.resolve(resolveContext, newModelBuilder, oldModelBuilder, artifactsBuilder, localComponentsResultBuilder);
                 results.resolved(newModelBuilder.complete(), localComponentsResultBuilder.complete());
 
                 ResolvedGraphResults graphResults = oldModelBuilder.complete();
-                results.retainState(graphResults, artifactsBuilder, oldTransientModelBuilder);
+                resultsBuilder.retainState(graphResults, artifactsBuilder, oldTransientModelBuilder);
             }
         });
     }
@@ -156,27 +155,11 @@ public class DefaultDependencyResolver implements ArtifactDependencyResolver {
     public void resolveArtifacts(final ResolveContext resolveContext,
                                  final List<? extends ResolutionAwareRepository> repositories,
                                  final GlobalDependencyResolutionRules metadataHandler,
-                                 final DefaultResolverResults results) throws ResolveException {
-        ResolvedGraphResults graphResults = results.getGraphResults();
-        ResolvedArtifactResults artifactResults = results.getArtifactsBuilder().resolve();
+                                 final ResolverResults results) throws ResolveException {
+        ResolverResultsBuilder resultsBuilder = (ResolverResultsBuilder) results;
+        //ResolvedGraphResults graphResults = resultsBuilder.getGraphResults();
+        ResolvedArtifactResults artifactResults = resultsBuilder.getResolvedArtifactsBuilder().resolve();
 
-        if (resolveContext instanceof Configuration) {
-            // TODO:DAZ Should not be holding onto all of this state
-
-
-            Factory<TransientConfigurationResults> transientConfigurationResultsFactory = new TransientConfigurationResultsLoader(results.getTransientConfigurationResultsBuilder(), graphResults, artifactResults);
-
-            DefaultLenientConfiguration result = new DefaultLenientConfiguration(
-                (Configuration) resolveContext, cacheLockingManager, graphResults, artifactResults, transientConfigurationResultsFactory);
-            results.withResolvedConfiguration(new DefaultResolvedConfiguration(result));
-        } else {
-            results.getResolutionResult().allComponents(new Action<ResolvedComponentResult>() {
-                @Override
-                public void execute(ResolvedComponentResult resolvedComponentResult) {
-
-                }
-            });
-        }
     }
 
     private ArtifactResolver createArtifactResolver(ArtifactResolver origin) {

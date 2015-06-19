@@ -43,6 +43,8 @@ import org.gradle.api.internal.artifacts.ivyservice.resolveengine.DefaultDepende
 import org.gradle.api.internal.artifacts.ivyservice.resolveengine.store.ResolutionResultsStoreFactory;
 import org.gradle.api.internal.artifacts.mvnsettings.*;
 import org.gradle.api.internal.artifacts.repositories.transport.RepositoryTransportFactory;
+import org.gradle.api.internal.artifacts.result.DefaultResolverResultsToResolvedConfigurationAdapter;
+import org.gradle.api.internal.artifacts.result.ResolverResultsToResolvedConfigurationAdapter;
 import org.gradle.api.internal.file.FileLookup;
 import org.gradle.api.internal.file.TemporaryFileProvider;
 import org.gradle.api.internal.file.TmpDirTemporaryFileProvider;
@@ -250,5 +252,9 @@ class DependencyManagementBuildScopeServices {
 
     ResolverProvider createProjectResolverProvider(ProjectDependencyResolver resolver) {
         return DelegatingResolverProvider.of(resolver);
+    }
+
+    ResolverResultsToResolvedConfigurationAdapter createResolverResultsAdapter(CacheLockingManager cacheLockingManager) {
+        return new DefaultResolverResultsToResolvedConfigurationAdapter(cacheLockingManager);
     }
 }

@@ -20,6 +20,7 @@ import org.gradle.api.Action;
 import org.gradle.api.artifacts.ResolveException;
 import org.gradle.api.artifacts.ResolvedConfiguration;
 import org.gradle.api.artifacts.result.ResolutionResult;
+import org.gradle.api.internal.artifacts.ivyservice.resolveengine.oldresult.DefaultResolvedArtifactsBuilder;
 import org.gradle.api.internal.artifacts.ivyservice.resolveengine.oldresult.ResolvedArtifactsBuilder;
 import org.gradle.api.internal.artifacts.ivyservice.resolveengine.oldresult.ResolvedGraphResults;
 import org.gradle.api.internal.artifacts.ivyservice.resolveengine.oldresult.TransientConfigurationResultsBuilder;
@@ -27,7 +28,7 @@ import org.gradle.api.internal.artifacts.ivyservice.resolveengine.projectresult.
 import org.gradle.api.internal.artifacts.ivyservice.resolveengine.projectresult.ResolvedProjectConfiguration;
 import org.gradle.api.internal.artifacts.ivyservice.resolveengine.result.ResolvedArtifactsContainer;
 
-public class DefaultResolverResults implements ResolverResults {
+public class DefaultResolverResults implements ResolverResults, ResolverResultsBuilder {
     private ResolvedConfiguration resolvedConfiguration;
     private ResolutionResult resolutionResult;
     private ResolveException fatalFailure;
@@ -35,6 +36,10 @@ public class DefaultResolverResults implements ResolverResults {
     private TransientConfigurationResultsBuilder transientConfigurationResultsBuilder;
     private ResolvedGraphResults graphResults;
     private ResolvedArtifactsBuilder artifactResults;
+
+    public DefaultResolverResults() {
+        artifactResults = new DefaultResolvedArtifactsBuilder();
+    }
 
     @Override
     public boolean hasError() {
@@ -48,13 +53,6 @@ public class DefaultResolverResults implements ResolverResults {
             return true;
         }
         return false;
-    }
-
-    //old model, slowly being replaced by the new model
-    @Override
-    public ResolvedConfiguration getResolvedConfiguration() {
-        assertHasArtifacts();
-        return resolvedConfiguration;
     }
 
     //new model
@@ -104,15 +102,27 @@ public class DefaultResolverResults implements ResolverResults {
         }
     }
 
+    @Override
     public void resolved(ResolutionResult resolutionResult, ResolvedLocalComponentsResult resolvedLocalComponentsResult) {
         this.resolutionResult = resolutionResult;
         this.resolvedLocalComponentsResult = resolvedLocalComponentsResult;
         this.fatalFailure = null;
     }
 
+    @Override
     public void failed(ResolveException failure) {
         this.resolutionResult = null;
         this.fatalFailure = failure;
+    }
+
+    @Override
+    public ResolveException getFailure() {
+        return fatalFailure;
+    }
+
+    @Override
+    public ResolvedArtifactsBuilder getResolvedArtifactsBuilder() {
+        return artifactResults;
     }
 
     public void retainState(ResolvedGraphResults graphResults, ResolvedArtifactsBuilder artifactResults, TransientConfigurationResultsBuilder transientConfigurationResultsBuilder) {
@@ -130,10 +140,6 @@ public class DefaultResolverResults implements ResolverResults {
 
     public ResolvedGraphResults getGraphResults() {
         return graphResults;
-    }
-
-    public ResolvedArtifactsBuilder getArtifactsBuilder() {
-        return artifactResults;
     }
 
     public TransientConfigurationResultsBuilder getTransientConfigurationResultsBuilder() {

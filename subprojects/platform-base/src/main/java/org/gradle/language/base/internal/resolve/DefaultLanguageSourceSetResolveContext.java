@@ -53,4 +53,8 @@ public abstract class DefaultLanguageSourceSetResolveContext implements ResolveC
     public ResolutionStrategyInternal getResolutionStrategy() {
         return resolutionStrategy;
     }
+
+    public boolean isTransitive() {
+        return false;
+    }
 }

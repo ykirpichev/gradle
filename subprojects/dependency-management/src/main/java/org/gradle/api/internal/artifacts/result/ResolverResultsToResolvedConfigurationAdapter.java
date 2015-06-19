@@ -13,24 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.gradle.api.internal.artifacts;
+package org.gradle.api.internal.artifacts.result;
 
-import org.gradle.api.artifacts.DependencySet;
-import org.gradle.api.artifacts.ResolutionStrategy;
+import org.gradle.api.artifacts.ResolvedConfiguration;
+import org.gradle.api.internal.artifacts.ResolverResults;
+import org.gradle.api.internal.artifacts.configurations.ConfigurationInternal;
 
-/**
- * Represents something that can be resolved.
- */
-public interface ResolveContext {
-
-    String getName();
-
-    DependencySet getDependencies();
-
-    DependencySet getAllDependencies();
-
-    ResolutionStrategy getResolutionStrategy();
-
-    boolean isTransitive();
-
+public interface ResolverResultsToResolvedConfigurationAdapter {
+    ResolvedConfiguration toResolvedConfiguration(ResolverResults results, ConfigurationInternal configuration);
 }

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 package org.gradle.api.internal.artifacts.configurations
-
 import org.gradle.api.Action
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.Project
@@ -29,6 +28,7 @@ import org.gradle.api.internal.artifacts.dependencies.DefaultExternalModuleDepen
 import org.gradle.api.internal.artifacts.dsl.dependencies.ProjectFinder
 import org.gradle.api.internal.artifacts.ivyservice.resolveengine.projectresult.ResolvedLocalComponentsResult
 import org.gradle.api.internal.artifacts.publish.DefaultPublishArtifact
+import org.gradle.api.internal.artifacts.result.ResolverResultsToResolvedConfigurationAdapter
 import org.gradle.api.internal.tasks.DefaultTaskDependency
 import org.gradle.api.specs.Spec
 import org.gradle.api.tasks.TaskDependency
@@ -51,6 +51,7 @@ class DefaultConfigurationSpec extends Specification {
     def resolutionStrategy = Mock(ResolutionStrategyInternal)
     def projectAccessListener = Mock(ProjectAccessListener)
     def projectFinder = Mock(ProjectFinder)
+    def resolverResultsAdapter = Mock(ResolverResultsToResolvedConfigurationAdapter)
 
     def setup() {
         ListenerBroadcast<DependencyResolutionListener> broadcast = new ListenerBroadcast<DependencyResolutionListener>(DependencyResolutionListener)
@@ -257,6 +258,7 @@ class DefaultConfigurationSpec extends Specification {
         def configuration = conf()
         def fileSet = [new File("somePath")] as Set
         def resolvedConfiguration = Mock(ResolvedConfiguration)
+        resolverResultsAdapter.toResolvedConfiguration(_,_) >> resolvedConfiguration
 
         given:
         expectResolved(resolvedConfiguration);
@@ -277,6 +279,7 @@ class DefaultConfigurationSpec extends Specification {
         def configuration = conf()
         def resolvedConfiguration = Mock(ResolvedConfiguration)
         def failure = new RuntimeException()
+        resolverResultsAdapter.toResolvedConfiguration(_,_) >> resolvedConfiguration
 
         given:
         expectResolved(resolvedConfiguration);
@@ -395,6 +398,7 @@ class DefaultConfigurationSpec extends Specification {
     def "resolves as resolved configuration"() {
         def configuration = conf()
         def resolvedConfiguration = Mock(ResolvedConfiguration)
+        resolverResultsAdapter.toResolvedConfiguration(_,_) >> resolvedConfiguration
 
         given:
         expectResolved(resolvedConfiguration)
@@ -410,6 +414,7 @@ class DefaultConfigurationSpec extends Specification {
     def "multiple resolves use cached result"() {
         def configuration = conf()
         def resolvedConfiguration = Mock(ResolvedConfiguration)
+        resolverResultsAdapter.toResolvedConfiguration(_,_) >> resolvedConfiguration
 
         given:
         expectResolved(resolvedConfiguration)
@@ -423,6 +428,7 @@ class DefaultConfigurationSpec extends Specification {
 
     private prepareForFilesBySpec(Set<File> fileSet) {
         def resConfig = Mock(ResolvedConfiguration)
+        resolverResultsAdapter.toResolvedConfiguration(_,_) >> resConfig
         expectResolved(resConfig)
         1 * resConfig.getFiles(_ as Spec) >> fileSet
     }
@@ -789,6 +795,7 @@ class DefaultConfigurationSpec extends Specification {
         def resolvedConfiguration = Mock(ResolvedConfiguration)
         def resolverResults = new DefaultResolverResults()
         def projectConfigurationResults = Mock(ResolvedLocalComponentsResult)
+        resolverResultsAdapter.toResolvedConfiguration(_,_) >> resolvedConfiguration
 
         given:
         config.dependencies.add(dependency)
@@ -927,6 +934,7 @@ class DefaultConfigurationSpec extends Specification {
         def localComponentsResult = Mock(ResolvedLocalComponentsResult)
         localComponentsResult.resolvedProjectConfigurations >> []
         localComponentsResult.componentBuildDependencies >> new DefaultTaskDependency()
+        resolverResultsAdapter.toResolvedConfiguration(_,_) >> resolvedConfiguration
         resolver.resolve(config, _) >> { ConfigurationInternal conf, DefaultResolverResults res ->
             res.resolved(resolutionResult, localComponentsResult)
         }
@@ -1055,6 +1063,7 @@ class DefaultConfigurationSpec extends Specification {
         def result = Mock(ResolutionResult)
         def resolvedConfiguration = Mock(ResolvedConfiguration)
         def resolvedFiles = Mock(Set)
+        resolverResultsAdapter.toResolvedConfiguration(_,_) >> resolvedConfiguration
 
         when:
         resolves(config, result, resolvedConfiguration)
@@ -1282,6 +1291,7 @@ All Artifacts:
     private ResolvedConfiguration resolveConfig(ConfigurationInternal config, ConfigurationResolver dependencyResolver = resolver) {
         def resolvedConfiguration = Mock(ResolvedConfiguration)
         def resolutionResult = Mock(ResolutionResult)
+        resolverResultsAdapter.toResolvedConfiguration(_,_) >> resolvedConfiguration
 
         resolves(config, resolutionResult, resolvedConfiguration)
         resolvedConfiguration
@@ -1292,7 +1302,7 @@ All Artifacts:
     }
 
     private DefaultConfiguration conf(String confName = "conf", String path = ":conf") {
-        new DefaultConfiguration(path, confName, configurationsProvider, resolver, listenerManager, metaDataProvider, resolutionStrategy, projectAccessListener, projectFinder)
+        new DefaultConfiguration(path, confName, configurationsProvider, resolver, listenerManager, metaDataProvider, resolutionStrategy, projectAccessListener, projectFinder, resolverResultsAdapter)
     }
 
     private DefaultPublishArtifact artifact(String name) {

@@ -36,4 +36,11 @@ public class ResolveException extends DefaultMultiCauseException {
     private static String buildMessage(ResolveContext configuration) {
         return String.format("Could not resolve all dependencies for %s.", configuration);
     }
+
+    public static ResolveException wrap(Throwable e, ResolveContext configuration) {
+        if (e instanceof ResolveException) {
+            return (ResolveException) e;
+        }
+        return new ResolveException(configuration, e);
+    }
 }
