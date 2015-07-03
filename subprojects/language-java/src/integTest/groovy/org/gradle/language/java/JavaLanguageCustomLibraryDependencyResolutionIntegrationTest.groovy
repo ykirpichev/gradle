@@ -20,7 +20,7 @@ import org.gradle.integtests.fixtures.AbstractIntegrationSpec
 class JavaLanguageCustomLibraryDependencyResolutionIntegrationTest extends AbstractIntegrationSpec {
 
 
-    def "fails if a dependency is not a JvmLibrarySpec library"() {
+    def "can depend on a custom component producing a JVM library"() {
         given:
         applyJavaPlugin(buildFile)
         addCustomLibraryType(buildFile)
