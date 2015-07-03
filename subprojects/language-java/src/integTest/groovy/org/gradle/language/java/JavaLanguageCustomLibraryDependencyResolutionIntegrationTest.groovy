@@ -67,9 +67,10 @@ model {
 
 model {
     components {
+        main(JvmLibrarySpec)
         zdep(CustomLibrary) {
             sources {
-                java {
+                java(JavaSourceSet) {
                     dependencies {
                         library 'main'
                     }
@@ -82,12 +83,13 @@ model {
         zdepJar.finalizedBy('checkDependencies')
         create('checkDependencies') {
             doLast {
-                assert compileZdepJarJdepJava.taskDependencies.getDependencies(compileZdepJarJdepJava).contains(mainJar)
+                assert compileZdepJarZdepJava.taskDependencies.getDependencies(compileZdepJarZdepJava).contains(mainJar)
             }
         }
     }
 }
 '''
+        file('src/zdep/java/App.java') << 'public class App extends TestApp {}'
         file('src/main/java/TestApp.java') << 'public class TestApp {}'
 
         expect:
