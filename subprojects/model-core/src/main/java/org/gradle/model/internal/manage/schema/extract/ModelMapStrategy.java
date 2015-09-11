@@ -16,15 +16,12 @@
 
 package org.gradle.model.internal.manage.schema.extract;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import net.jcip.annotations.ThreadSafe;
 import org.gradle.internal.Actions;
 import org.gradle.model.ModelMap;
 import org.gradle.model.collection.internal.ModelMapModelProjection;
-import org.gradle.model.internal.core.NodeInitializer;
 import org.gradle.model.internal.inspect.ManagedChildNodeCreatorStrategy;
-import org.gradle.model.internal.inspect.ProjectionOnlyNodeInitializer;
 import org.gradle.model.internal.manage.schema.ModelCollectionSchema;
 import org.gradle.model.internal.manage.schema.ModelSchemaStore;
 import org.gradle.model.internal.manage.schema.cache.ModelSchemaCache;
@@ -61,20 +58,15 @@ public class ModelMapStrategy implements ModelSchemaExtractionStrategy {
                 throw new InvalidManagedModelElementTypeException(extractionContext, String.format("%1$s cannot be used as type parameter of %1$s.", ModelMap.class.getName()));
             }
 
-            return gettModelSchemaExtractionResult(extractionContext, cache, elementType, store);
+            return gettModelSchemaExtractionResult(extractionContext, elementType, store);
         } else {
             return null;
         }
     }
 
-    private <T, E> ModelSchemaExtractionResult<T> gettModelSchemaExtractionResult(ModelSchemaExtractionContext<T> extractionContext, final ModelSchemaCache cache, ModelType<E> elementType, final ModelSchemaStore store) {
-        ModelCollectionSchema<T, E> schema = new ModelCollectionSchema<T, E>(extractionContext.getType(), elementType, new Function<ModelCollectionSchema<T, E>, NodeInitializer>() {
-            @Override
-            public NodeInitializer apply(ModelCollectionSchema<T, E> input) {
-                final ManagedChildNodeCreatorStrategy<E> childCreator = new ManagedChildNodeCreatorStrategy<E>(store);
-                return new ProjectionOnlyNodeInitializer(ModelMapModelProjection.managed(input.getElementType(), childCreator));
-            }
-        });
+    private <T, E> ModelSchemaExtractionResult<T> gettModelSchemaExtractionResult(ModelSchemaExtractionContext<T> extractionContext, ModelType<E> elementType, final ModelSchemaStore store) {
+        ManagedChildNodeCreatorStrategy<E> childCreator = new ManagedChildNodeCreatorStrategy<E>(store);
+        ModelCollectionSchema<T, E> schema = new ModelCollectionSchema<T, E>(extractionContext.getType(), elementType, ModelMapModelProjection.managed(elementType, childCreator));
         ModelSchemaExtractionContext<?> typeParamExtractionContext = extractionContext.child(elementType, "element type", Actions.doNothing());
         return new ModelSchemaExtractionResult<T>(schema, ImmutableList.of(typeParamExtractionContext));
     }

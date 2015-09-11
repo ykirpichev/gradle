@@ -15,10 +15,9 @@
  */
 package org.gradle.model.internal.manage.schema.extract;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import org.gradle.api.Action;
-import org.gradle.model.internal.core.NodeInitializer;
+import org.gradle.model.internal.core.ModelProjection;
 import org.gradle.model.internal.manage.schema.ManagedImplModelSchema;
 import org.gradle.model.internal.manage.schema.ModelCollectionSchema;
 import org.gradle.model.internal.manage.schema.ModelSchema;
@@ -48,7 +47,8 @@ public abstract class CollectionStrategy implements ModelSchemaExtractionStrateg
             throw new InvalidManagedModelElementTypeException(extractionContext, String.format("%1$s cannot be used as type parameter of %1$s", modelType.getConcreteClass().getName()));
         }
 
-        ModelCollectionSchema<T, E> schema = new ModelCollectionSchema<T, E>(extractionContext.getType(), elementType, this.<T, E>getNodeInitializer(store));
+        ModelType<T> type = extractionContext.getType();
+        ModelCollectionSchema<T, E> schema = new ModelCollectionSchema<T, E>(type, elementType, getProjection(type, elementType, store));
         ModelSchemaExtractionContext<?> typeParamExtractionContext = extractionContext.child(elementType, "element type", new Action<ModelSchemaExtractionContext<?>>() {
             public void execute(ModelSchemaExtractionContext<?> context) {
                 ModelSchema<?> typeParamSchema = cache.get(context.getType());
@@ -64,5 +64,5 @@ public abstract class CollectionStrategy implements ModelSchemaExtractionStrateg
         return new ModelSchemaExtractionResult<T>(schema, ImmutableList.of(typeParamExtractionContext));
     }
 
-    protected abstract <T, E> Function<ModelCollectionSchema<T, E>, NodeInitializer> getNodeInitializer(ModelSchemaStore store);
+    protected abstract <T, E> ModelProjection getProjection(ModelType<T> type, ModelType<E> elementType, ModelSchemaStore store);
 }
