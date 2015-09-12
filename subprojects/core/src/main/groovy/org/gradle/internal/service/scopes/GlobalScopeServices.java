@@ -56,6 +56,8 @@ import org.gradle.messaging.remote.MessagingServer;
 import org.gradle.messaging.remote.internal.MessagingServices;
 import org.gradle.messaging.remote.internal.inet.InetAddressFactory;
 import org.gradle.model.internal.DynamicObjectAwareTypeUtils;
+import org.gradle.model.internal.core.DefaultNodeInitializerRegistry;
+import org.gradle.model.internal.core.NodeInitializerRegistry;
 import org.gradle.model.internal.inspect.MethodModelRuleExtractor;
 import org.gradle.model.internal.inspect.MethodModelRuleExtractors;
 import org.gradle.model.internal.inspect.ModelRuleExtractor;
@@ -201,9 +203,9 @@ public class GlobalScopeServices {
         return new DefaultFileLookup(fileSystem);
     }
 
-    ModelRuleExtractor createModelRuleInspector(ServiceRegistry services, ModelSchemaStore modelSchemaStore) {
+    ModelRuleExtractor createModelRuleInspector(ServiceRegistry services, ModelSchemaStore modelSchemaStore, NodeInitializerRegistry nodeInitializerRegistry) {
         List<MethodModelRuleExtractor> extractors = services.getAll(MethodModelRuleExtractor.class);
-        List<MethodModelRuleExtractor> coreExtractors = MethodModelRuleExtractors.coreExtractors(modelSchemaStore);
+        List<MethodModelRuleExtractor> coreExtractors = MethodModelRuleExtractors.coreExtractors(modelSchemaStore, nodeInitializerRegistry);
         return new ModelRuleExtractor(Iterables.concat(coreExtractors, extractors));
     }
 
@@ -230,8 +232,12 @@ public class GlobalScopeServices {
         return new ModelSchemaExtractor(strategies, aspectExtractor);
     }
 
-    protected ModelSchemaStore createModelSchemaStore(ModelSchemaExtractor modelSchemaExtractor) {
-        return new DefaultModelSchemaStore(modelSchemaExtractor, Collections.singleton(DynamicObjectAwareTypeUtils.MODEL_TYPE_EXTRACTOR));
+    protected NodeInitializerRegistry createNodeInitializerRegistry() {
+        return new DefaultNodeInitializerRegistry();
+    }
+
+    protected ModelSchemaStore createModelSchemaStore(ModelSchemaExtractor modelSchemaExtractor, NodeInitializerRegistry nodeInitializerRegistry) {
+        return new DefaultModelSchemaStore(modelSchemaExtractor, Collections.singleton(DynamicObjectAwareTypeUtils.MODEL_TYPE_EXTRACTOR), nodeInitializerRegistry);
     }
 
     protected ModelRuleSourceDetector createModelRuleSourceDetector() {

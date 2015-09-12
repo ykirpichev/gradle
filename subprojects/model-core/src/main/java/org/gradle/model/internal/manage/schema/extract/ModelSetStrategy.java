@@ -34,27 +34,29 @@ public class ModelSetStrategy extends SetStrategy {
     }
 
     @Override
-    protected <T, E> ModelProjection getProjection(ModelType<T> type, ModelType<E> elementType, ModelSchemaStore store) {
+    protected <T, E> ModelProjection getProjection(ModelType<T> type, ModelType<E> elementType, ModelSchemaStore store, NodeInitializerRegistry nodeInitializerRegistry) {
         return TypedModelProjection.of(
             ModelTypes.modelSet(elementType),
-            new ModelSetModelViewFactory<E>(elementType, store)
+            new ModelSetModelViewFactory<E>(elementType, store, nodeInitializerRegistry)
         );
     }
 
     private static class ModelSetModelViewFactory<T> implements ModelViewFactory<ModelSet<T>> {
         private final ModelType<T> elementType;
         private final ModelSchemaStore store;
+        private final NodeInitializerRegistry nodeInitializerRegistry;
 
-        public ModelSetModelViewFactory(ModelType<T> elementType, ModelSchemaStore store) {
+        public ModelSetModelViewFactory(ModelType<T> elementType, ModelSchemaStore store, NodeInitializerRegistry nodeInitializerRegistry) {
             this.elementType = elementType;
             this.store = store;
+            this.nodeInitializerRegistry = nodeInitializerRegistry;
         }
 
         @Override
         public ModelView<ModelSet<T>> toView(MutableModelNode modelNode, ModelRuleDescriptor ruleDescriptor, boolean writable) {
             ModelType<ModelSet<T>> setType = ModelTypes.modelSet(elementType);
             DefaultModelViewState state = new DefaultModelViewState(setType, ruleDescriptor, writable, !writable);
-            final ManagedChildNodeCreatorStrategy<T> childCreator = new ManagedChildNodeCreatorStrategy<T>(store);
+            final ManagedChildNodeCreatorStrategy<T> childCreator = new ManagedChildNodeCreatorStrategy<T>(store, nodeInitializerRegistry);
             NodeBackedModelSet<T> set = new NodeBackedModelSet<T>(setType.toString() + " '" + modelNode.getPath() + "'", elementType, ruleDescriptor, modelNode, state, childCreator);
             return InstanceModelView.of(modelNode.getPath(), setType, set, state.closer());
         }

@@ -31,9 +31,11 @@ import java.util.List;
 public class ManagedModelInitializer<T> implements NodeInitializer {
 
     protected final ModelManagedImplStructSchema<T> modelSchema;
+    protected final NodeInitializerRegistry nodeInitializerRegistry;
 
-    public ManagedModelInitializer(ModelManagedImplStructSchema<T> modelSchema) {
+    public ManagedModelInitializer(ModelManagedImplStructSchema<T> modelSchema, NodeInitializerRegistry nodeInitializerRegistry) {
         this.modelSchema = modelSchema;
+        this.nodeInitializerRegistry = nodeInitializerRegistry;
     }
 
     @Override
@@ -62,7 +64,7 @@ public class ManagedModelInitializer<T> implements NodeInitializer {
 
     @Override
     public List<? extends ModelProjection> getProjections() {
-        return Collections.singletonList(new ManagedModelProjection<T>(modelSchema, ManagedProxyFactory.INSTANCE));
+        return Collections.singletonList(new ManagedModelProjection<T>(modelSchema, ManagedProxyFactory.INSTANCE, nodeInitializerRegistry));
     }
 
     private <P> void addPropertyLink(MutableModelNode modelNode, ModelProperty<P> property) {
@@ -78,20 +80,20 @@ public class ManagedModelInitializer<T> implements NodeInitializer {
         if (propertySchema instanceof ManagedImplModelSchema) {
             if (!property.isWritable()) {
                 ManagedImplModelSchema<P> managedPropertySchema = (ManagedImplModelSchema<P>) propertySchema;
-                ModelCreator creator = ModelCreators.of(modelNode.getPath().child(property.getName()), managedPropertySchema.getNodeInitializer())
+                ModelCreator creator = ModelCreators.of(modelNode.getPath().child(property.getName()), nodeInitializerRegistry.getNodeInitializer(managedPropertySchema))
                     .descriptor(descriptor)
                     .build();
                 modelNode.addLink(creator);
             } else {
                 if (propertySchema instanceof ScalarCollectionSchema) {
                     ManagedImplModelSchema<P> managedPropertySchema = (ManagedImplModelSchema<P>) propertySchema;
-                    ModelCreator creator = ModelCreators.of(modelNode.getPath().child(property.getName()), managedPropertySchema.getNodeInitializer())
+                    ModelCreator creator = ModelCreators.of(modelNode.getPath().child(property.getName()), nodeInitializerRegistry.getNodeInitializer(managedPropertySchema))
                         .descriptor(descriptor)
                         .build();
                     modelNode.addLink(creator);
                 } else {
                     ModelManagedImplStructSchema<P> structSchema = (ModelManagedImplStructSchema<P>) propertySchema;
-                    ModelProjection projection = new ManagedModelProjection<P>(structSchema, ManagedProxyFactory.INSTANCE);
+                    ModelProjection projection = new ManagedModelProjection<P>(structSchema, ManagedProxyFactory.INSTANCE, nodeInitializerRegistry);
                     ModelCreator creator = ModelCreators.of(modelNode.getPath().child(property.getName()), BiActions.doNothing())
                         .withProjection(projection)
                         .descriptor(descriptor).build();

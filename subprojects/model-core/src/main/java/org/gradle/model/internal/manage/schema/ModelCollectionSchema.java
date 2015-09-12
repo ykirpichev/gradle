@@ -24,16 +24,20 @@ import java.util.List;
 
 public class ModelCollectionSchema<T, E> extends AbstractModelSchema<T> implements ManagedImplModelSchema<T> {
 
+    private final ModelType<T> type;
     private final ModelType<E> elementType;
+    private final ModelProjection projection;
     private final NodeInitializer nodeInitializer;
 
-    public ModelCollectionSchema(ModelType<T> type, ModelType<E> elementType, final ModelProjection projection) {
+    public ModelCollectionSchema(ModelType<T> type, ModelType<E> elementType, ModelProjection projection) {
         super(type);
+        this.type = type;
         this.elementType = elementType;
+        this.projection = projection;
         this.nodeInitializer = new NodeInitializer() {
             @Override
             public List<? extends ModelProjection> getProjections() {
-                return Collections.singletonList(projection);
+                return Collections.singletonList(ModelCollectionSchema.this.projection);
             }
 
             @Override

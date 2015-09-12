@@ -41,7 +41,7 @@ public class ScalarCollectionStrategy extends CollectionStrategy {
         ModelType.of(Set.class)
     );
 
-    public <T> ModelSchemaExtractionResult<T> extract(ModelSchemaExtractionContext<T> extractionContext, ModelSchemaStore store, ModelSchemaCache cache) {
+    public <T> ModelSchemaExtractionResult<T> extract(ModelSchemaExtractionContext<T> extractionContext, ModelSchemaStore store, ModelSchemaCache cache, NodeInitializerRegistry nodeInitializerRegistry) {
         ModelType<T> type = extractionContext.getType();
         Class<? super T> rawClass = type.getRawClass();
         ModelType<? super T> rawCollectionType = ModelType.of(rawClass);
@@ -49,19 +49,19 @@ public class ScalarCollectionStrategy extends CollectionStrategy {
             ModelType<?> elementType = type.getTypeVariables().get(0);
             if (ScalarTypes.isScalarType(elementType)) {
                 validateType(rawCollectionType, extractionContext, type);
-                return new ModelSchemaExtractionResult<T>(createSchema(store, type, elementType));
+                return new ModelSchemaExtractionResult<T>(createSchema(store, nodeInitializerRegistry, type, elementType));
             }
         }
 
         return null;
     }
 
-    private <T, E> ScalarCollectionSchema<T, E> createSchema(ModelSchemaStore store, ModelType<T> type, ModelType<E> elementType) {
-        return new ScalarCollectionSchema<T, E>(type, elementType, getProjection(type, elementType, store));
+    private <T, E> ScalarCollectionSchema<T, E> createSchema(ModelSchemaStore store, NodeInitializerRegistry nodeInitializerRegistry, ModelType<T> type, ModelType<E> elementType) {
+        return new ScalarCollectionSchema<T, E>(type, elementType, getProjection(type, elementType, store, nodeInitializerRegistry));
     }
 
     @Override
-    protected <T, E> ModelProjection getProjection(ModelType<T> type, ModelType<E> elementType, ModelSchemaStore store) {
+    protected <T, E> ModelProjection getProjection(ModelType<T> type, ModelType<E> elementType, ModelSchemaStore store, NodeInitializerRegistry nodeInitializerRegistry) {
         if (type.getRawClass() == List.class) {
             return ScalarCollectionModelProjection.get(
                 ModelTypes.list(elementType),
