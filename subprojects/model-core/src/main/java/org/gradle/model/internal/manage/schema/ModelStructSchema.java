@@ -25,6 +25,8 @@ public interface ModelStructSchema<T> extends ModelSchema<T> {
 
     ModelProperty<?> getProperty(String name);
 
+    <P> ModelSchema<P> getPropertySchema(ModelProperty<P> property);
+
     Collection<ModelProperty<?>> getProperties();
 
     boolean hasAspect(Class<? extends ModelSchemaAspect> aspectType);

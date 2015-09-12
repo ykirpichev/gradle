@@ -20,8 +20,8 @@ import org.gradle.model.internal.manage.schema.extract.ModelSchemaAspect;
 import org.gradle.model.internal.type.ModelType;
 
 public class ModelUnmanagedImplStructSchema<T> extends AbstractModelStructSchema<T> {
-    public ModelUnmanagedImplStructSchema(ModelType<T> type, Iterable<ModelProperty<?>> properties, Iterable<ModelSchemaAspect> aspects) {
-        super(type, properties, aspects);
+    public ModelUnmanagedImplStructSchema(ModelSchemaStore schemaStore, ModelType<T> type, Iterable<ModelProperty<?>> properties, Iterable<ModelSchemaAspect> aspects) {
+        super(schemaStore, type, properties, aspects);
     }
 
     @Override

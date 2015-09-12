@@ -41,7 +41,7 @@ public class UnmanagedImplStructStrategy extends StructSchemaExtractionStrategyS
                 return propertyResult.getProperty();
             }
         });
-        return new ModelUnmanagedImplStructSchema<R>(extractionContext.getType(), properties, aspects);
+        return new ModelUnmanagedImplStructSchema<R>(store, extractionContext.getType(), properties, aspects);
     }
 
     @Override

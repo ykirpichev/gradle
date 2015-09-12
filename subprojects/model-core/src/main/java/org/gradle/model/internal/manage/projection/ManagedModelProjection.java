@@ -34,14 +34,12 @@ import java.util.Map;
 
 public class ManagedModelProjection<M> extends TypeCompatibilityModelProjectionSupport<M> {
 
-    private final ModelSchemaStore schemaStore;
     private final ManagedProxyFactory proxyFactory;
     private final ModelManagedImplStructSchema<M> schema;
 
-    public ManagedModelProjection(ModelManagedImplStructSchema<M> schema, ModelSchemaStore schemaStore, ManagedProxyFactory proxyFactory) {
+    public ManagedModelProjection(ModelManagedImplStructSchema<M> schema, ManagedProxyFactory proxyFactory) {
         super(schema.getType(), true, true);
         this.schema = schema;
-        this.schemaStore = schemaStore;
         this.proxyFactory = proxyFactory;
     }
 
@@ -100,7 +98,7 @@ public class ManagedModelProjection<M> extends TypeCompatibilityModelProjectionS
                     propertyNode.ensureUsable();
 
                     ModelView<? extends T> modelView;
-                    ModelSchema<T> propertySchema = schemaStore.getSchema(propertyType);
+                    ModelSchema<T> propertySchema = schema.getPropertySchema(property);
                     if (property.isWritable() && propertySchema instanceof ScalarCollectionSchema) {
                         Collection<?> instance = ScalarCollectionSchema.get(propertyNode);
                         if (instance == null) {
@@ -124,19 +122,18 @@ public class ManagedModelProjection<M> extends TypeCompatibilityModelProjectionS
                     }
 
                     ModelProperty<?> property = schema.getProperty(name);
-                    ModelType<?> propertyType = property.getType();
 
-                    doSet(name, value, propertyType);
+                    doSet(name, value, property);
                     propertyViews.put(name, value);
                 }
 
-                private <T> void doSet(String name, Object value, ModelType<T> propertyType) {
-                    ModelSchema<T> propertySchema = schemaStore.getSchema(propertyType);
-
+                private <T> void doSet(String name, Object value, ModelProperty<T> property) {
                     // TODO we are relying on the creator having established these links, we should be checking
                     MutableModelNode propertyNode = modelNode.getLink(name);
                     propertyNode.ensureUsable();
 
+                    ModelSchema<T> propertySchema = schema.getPropertySchema(property);
+                    ModelType<T> propertyType = property.getType();
                     if (propertySchema instanceof ManagedImplModelSchema) {
                         if (value == null) {
                             if (propertySchema instanceof ScalarCollectionSchema) {

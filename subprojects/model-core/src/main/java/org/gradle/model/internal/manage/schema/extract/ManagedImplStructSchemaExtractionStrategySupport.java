@@ -125,15 +125,15 @@ public abstract class ManagedImplStructSchemaExtractionStrategySupport extends S
                 return propertyResult.getProperty();
             }
         });
-        return new ModelManagedImplStructSchema<R>(type, properties, aspects, implClass, delegateType, new Function<ModelManagedImplStructSchema<R>, NodeInitializer>() {
+        return new ModelManagedImplStructSchema<R>(store, type, properties, aspects, implClass, delegateType, new Function<ModelManagedImplStructSchema<R>, NodeInitializer>() {
             @Override
             public NodeInitializer apply(ModelManagedImplStructSchema<R> schema) {
-                return createNodeInitializer(schema, store);
+                return createNodeInitializer(schema);
             }
         });
     }
 
-    protected abstract <R> NodeInitializer createNodeInitializer(ModelManagedImplStructSchema<R> schema, ModelSchemaStore store);
+    protected abstract <R> NodeInitializer createNodeInitializer(ModelManagedImplStructSchema<R> schema);
 
     @Override
     protected void handleInvalidGetter(ModelSchemaExtractionContext<?> extractionContext, Method getter, String message) {

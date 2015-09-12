@@ -31,11 +31,9 @@ import java.util.List;
 public class ManagedModelInitializer<T> implements NodeInitializer {
 
     protected final ModelManagedImplStructSchema<T> modelSchema;
-    protected final ModelSchemaStore schemaStore;
 
-    public ManagedModelInitializer(ModelManagedImplStructSchema<T> modelSchema, ModelSchemaStore schemaStore) {
+    public ManagedModelInitializer(ModelManagedImplStructSchema<T> modelSchema) {
         this.modelSchema = modelSchema;
-        this.schemaStore = schemaStore;
     }
 
     @Override
@@ -64,7 +62,7 @@ public class ManagedModelInitializer<T> implements NodeInitializer {
 
     @Override
     public List<? extends ModelProjection> getProjections() {
-        return Collections.singletonList(new ManagedModelProjection<T>(modelSchema, schemaStore, ManagedProxyFactory.INSTANCE));
+        return Collections.singletonList(new ManagedModelProjection<T>(modelSchema, ManagedProxyFactory.INSTANCE));
     }
 
     private <P> void addPropertyLink(MutableModelNode modelNode, ModelProperty<P> property) {
@@ -74,7 +72,7 @@ public class ManagedModelInitializer<T> implements NodeInitializer {
         }
 
         ModelType<P> propertyType = property.getType();
-        ModelSchema<P> propertySchema = schemaStore.getSchema(propertyType);
+        ModelSchema<P> propertySchema = modelSchema.getPropertySchema(property);
 
         final ModelRuleDescriptor descriptor = modelNode.getDescriptor();
         if (propertySchema instanceof ManagedImplModelSchema) {
@@ -93,7 +91,7 @@ public class ManagedModelInitializer<T> implements NodeInitializer {
                     modelNode.addLink(creator);
                 } else {
                     ModelManagedImplStructSchema<P> structSchema = (ModelManagedImplStructSchema<P>) propertySchema;
-                    ModelProjection projection = new ManagedModelProjection<P>(structSchema, schemaStore, ManagedProxyFactory.INSTANCE);
+                    ModelProjection projection = new ManagedModelProjection<P>(structSchema, ManagedProxyFactory.INSTANCE);
                     ModelCreator creator = ModelCreators.of(modelNode.getPath().child(property.getName()), BiActions.doNothing())
                         .withProjection(projection)
                         .descriptor(descriptor).build();

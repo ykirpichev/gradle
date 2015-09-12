@@ -63,8 +63,8 @@ public class ManagedImplStructStrategy extends ManagedImplStructSchemaExtraction
     }
 
     @Override
-    protected <R> NodeInitializer createNodeInitializer(ModelManagedImplStructSchema<R> schema, ModelSchemaStore store) {
-        return new ManagedModelInitializer<R>(schema, store);
+    protected <R> NodeInitializer createNodeInitializer(ModelManagedImplStructSchema<R> schema) {
+        return new ManagedModelInitializer<R>(schema);
     }
 
     private <R> void ensureCanBeInstantiated(ModelSchemaExtractionContext<R> extractionContext, ModelManagedImplStructSchema<R> schema) {

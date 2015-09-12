@@ -29,9 +29,11 @@ import java.util.Map;
 public abstract class AbstractModelStructSchema<T> extends AbstractModelSchema<T> implements ModelStructSchema<T> {
     private final ImmutableSortedMap<String, ModelProperty<?>> properties;
     private final Map<Class<? extends ModelSchemaAspect>, ModelSchemaAspect> aspects;
+    private final ModelSchemaStore schemaStore;
 
-    public AbstractModelStructSchema(ModelType<T> type, Iterable<ModelProperty<?>> properties, Iterable<ModelSchemaAspect> aspects) {
+    public AbstractModelStructSchema(ModelSchemaStore schemaStore, ModelType<T> type, Iterable<ModelProperty<?>> properties, Iterable<ModelSchemaAspect> aspects) {
         super(type);
+        this.schemaStore = schemaStore;
         ImmutableSortedMap.Builder<String, ModelProperty<?>> builder = ImmutableSortedMap.naturalOrder();
         for (ModelProperty<?> property : properties) {
             builder.put(property.getName(), property);
@@ -58,6 +60,11 @@ public abstract class AbstractModelStructSchema<T> extends AbstractModelSchema<T
     @Override
     public ModelProperty<?> getProperty(String name) {
         return properties.get(name);
+    }
+
+    @Override
+    public <P> ModelSchema<P> getPropertySchema(ModelProperty<P> property) {
+        return schemaStore.getSchema(property.getType());
     }
 
     @Override

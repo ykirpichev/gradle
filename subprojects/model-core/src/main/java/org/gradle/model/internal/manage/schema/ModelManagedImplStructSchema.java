@@ -29,8 +29,8 @@ public class ModelManagedImplStructSchema<T> extends AbstractModelStructSchema<T
     private final WeakReference<Class<?>> delegateType;
     private final NodeInitializer nodeInitializer;
 
-    public ModelManagedImplStructSchema(ModelType<T> type, Iterable<ModelProperty<?>> properties, Iterable<ModelSchemaAspect> aspects, Class<? extends T> implementationType, @Nullable Class<?> delegateType, Function<? super ModelManagedImplStructSchema<T>, NodeInitializer> nodeInitializer) {
-        super(type, properties, aspects);
+    public ModelManagedImplStructSchema(ModelSchemaStore schemaStore, ModelType<T> type, Iterable<ModelProperty<?>> properties, Iterable<ModelSchemaAspect> aspects, Class<? extends T> implementationType, @Nullable Class<?> delegateType, Function<? super ModelManagedImplStructSchema<T>, NodeInitializer> nodeInitializer) {
+        super(schemaStore, type, properties, aspects);
         this.nodeInitializer = nodeInitializer.apply(this);
         this.implementationType = new WeakReference<Class<? extends T>>(implementationType);
         this.delegateType = new WeakReference<Class<?>>(delegateType);
