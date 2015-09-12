@@ -112,7 +112,7 @@ public class NodeBackedModelMap<T> implements ModelMap<T>, ManagedInstance {
             public <S extends T> NodeInitializer initializer(final ModelType<S> type) {
                 ModelSchema<S> schema = schemaStore.getSchema(type);
                 if (schema instanceof ManagedImplModelSchema) {
-                    return nodeInitializerRegistry.getNodeInitializer((ManagedImplModelSchema<?>) schema);
+                    return nodeInitializerRegistry.getNodeInitializer((ManagedImplModelSchema<?>) schema, schemaStore);
                 } else {
                     return new FactoryBasedNodeInitializer<T, S>(factoryReference, type);
                 }

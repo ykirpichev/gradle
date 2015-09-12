@@ -19,6 +19,7 @@ import org.gradle.internal.reflect.Instantiator
 import org.gradle.language.base.ProjectSourceSet
 import org.gradle.model.internal.core.*
 import org.gradle.model.internal.fixture.ModelRegistryHelper
+import org.gradle.model.internal.manage.schema.DefaultNodeInitializerRegistry
 import org.gradle.model.internal.manage.schema.ModelSchemaStore
 import org.gradle.model.internal.manage.schema.extract.DefaultModelSchemaStore
 import org.gradle.platform.base.ComponentSpecIdentifier

@@ -24,7 +24,7 @@ import org.gradle.model.internal.type.ModelType;
 
 public class EnumStrategy implements ModelSchemaExtractionStrategy {
 
-    public <T> ModelSchemaExtractionResult<T> extract(ModelSchemaExtractionContext<T> extractionContext, ModelSchemaStore store, ModelSchemaCache cache, NodeInitializerRegistry nodeInitializerRegistry) {
+    public <T> ModelSchemaExtractionResult<T> extractSchema(ModelSchemaExtractionContext<T> extractionContext, ModelSchemaStore store, ModelSchemaCache cache, NodeInitializerRegistry nodeInitializerRegistry) {
         ModelType<T> type = extractionContext.getType();
         if (type.getRawClass().isEnum()) {
             return new ModelSchemaExtractionResult<T>(new ModelValueSchema<T>(type));

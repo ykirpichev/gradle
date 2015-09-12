@@ -49,7 +49,7 @@ public abstract class StructSchemaExtractionStrategySupport implements ModelSche
 
     protected abstract boolean isTarget(ModelType<?> type);
 
-    public <R> ModelSchemaExtractionResult<R> extract(final ModelSchemaExtractionContext<R> extractionContext, ModelSchemaStore store, final ModelSchemaCache cache, NodeInitializerRegistry nodeInitializerRegistry) {
+    public <R> ModelSchemaExtractionResult<R> extractSchema(final ModelSchemaExtractionContext<R> extractionContext, ModelSchemaStore store, final ModelSchemaCache cache, NodeInitializerRegistry nodeInitializerRegistry) {
         ModelType<R> type = extractionContext.getType();
         if (!isTarget(type)) {
             return null;

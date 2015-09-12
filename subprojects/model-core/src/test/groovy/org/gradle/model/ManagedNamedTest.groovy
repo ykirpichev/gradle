@@ -16,7 +16,7 @@
 
 package org.gradle.model
 import org.gradle.api.Named
-import org.gradle.model.internal.core.DefaultNodeInitializerRegistry
+import org.gradle.model.internal.manage.schema.DefaultNodeInitializerRegistry
 import org.gradle.model.internal.core.ModelCreators
 import org.gradle.model.internal.fixture.ModelRegistryHelper
 import org.gradle.model.internal.manage.schema.extract.DefaultModelSchemaStore
@@ -31,13 +31,13 @@ class ManagedNamedTest extends Specification {
 
     def "named struct has name name property populated"() {
         when:
-        r.create(ModelCreators.of(r.path("foo"), nodeInitializerRegistry.getNodeInitializer(schemaStore.getSchema(NamedThingInterface))).descriptor(r.desc("foo")).build())
+        r.create(ModelCreators.of(r.path("foo"), nodeInitializerRegistry.getNodeInitializer(schemaStore.getSchema(NamedThingInterface), schemaStore)).descriptor(r.desc("foo")).build())
 
         then:
         r.realize("foo", NamedThingInterface).name == "foo"
 
         when:
-        r.create(ModelCreators.of(r.path("bar"), nodeInitializerRegistry.getNodeInitializer(schemaStore.getSchema(NamedThingInterface))).descriptor(r.desc("bar")).build())
+        r.create(ModelCreators.of(r.path("bar"), nodeInitializerRegistry.getNodeInitializer(schemaStore.getSchema(NamedThingInterface), schemaStore)).descriptor(r.desc("bar")).build())
 
         then:
         r.realize("bar", NamedThingInterface).name == "bar"
@@ -52,7 +52,7 @@ class ManagedNamedTest extends Specification {
 
     def "named struct does not have name populated if does not implement named"() {
         when:
-        r.create(ModelCreators.of(r.path("foo"), nodeInitializerRegistry.getNodeInitializer(schemaStore.getSchema(NonNamedThing))).descriptor(r.desc("foo")).build())
+        r.create(ModelCreators.of(r.path("foo"), nodeInitializerRegistry.getNodeInitializer(schemaStore.getSchema(NonNamedThing), schemaStore)).descriptor(r.desc("foo")).build())
 
         then:
         r.realize("foo", NonNamedThing).name == null

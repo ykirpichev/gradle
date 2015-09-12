@@ -17,12 +17,9 @@ package org.gradle.model.internal.manage.schema.extract;
 
 import com.google.common.collect.ImmutableList;
 import org.gradle.api.Action;
-import org.gradle.model.internal.core.ModelProjection;
-import org.gradle.model.internal.core.NodeInitializerRegistry;
 import org.gradle.model.internal.manage.schema.ManagedImplModelSchema;
 import org.gradle.model.internal.manage.schema.ModelCollectionSchema;
 import org.gradle.model.internal.manage.schema.ModelSchema;
-import org.gradle.model.internal.manage.schema.ModelSchemaStore;
 import org.gradle.model.internal.manage.schema.cache.ModelSchemaCache;
 import org.gradle.model.internal.type.ModelType;
 
@@ -43,13 +40,13 @@ public abstract class CollectionStrategy implements ModelSchemaExtractionStrateg
         }
     }
 
-    protected <T, E> ModelSchemaExtractionResult<T> getModelSchemaExtractionResult(ModelType<?> modelType, ModelSchemaExtractionContext<T> extractionContext, final ModelSchemaCache cache, ModelType<E> elementType, ModelSchemaStore store, NodeInitializerRegistry nodeInitializerRegistry) {
+    protected <T, E> ModelSchemaExtractionResult<T> getModelSchemaExtractionResult(ModelType<?> modelType, ModelSchemaExtractionContext<T> extractionContext, final ModelSchemaCache cache, ModelType<E> elementType) {
         if (modelType.isAssignableFrom(elementType)) {
             throw new InvalidManagedModelElementTypeException(extractionContext, String.format("%1$s cannot be used as type parameter of %1$s", modelType.getConcreteClass().getName()));
         }
 
         ModelType<T> type = extractionContext.getType();
-        ModelCollectionSchema<T, E> schema = new ModelCollectionSchema<T, E>(type, elementType, getProjection(type, elementType, store, nodeInitializerRegistry));
+        ModelCollectionSchema<T, E> schema = new ModelCollectionSchema<T, E>(type, elementType);
         ModelSchemaExtractionContext<?> typeParamExtractionContext = extractionContext.child(elementType, "element type", new Action<ModelSchemaExtractionContext<?>>() {
             public void execute(ModelSchemaExtractionContext<?> context) {
                 ModelSchema<?> typeParamSchema = cache.get(context.getType());
@@ -64,6 +61,4 @@ public abstract class CollectionStrategy implements ModelSchemaExtractionStrateg
         });
         return new ModelSchemaExtractionResult<T>(schema, ImmutableList.of(typeParamExtractionContext));
     }
-
-    protected abstract <T, E> ModelProjection getProjection(ModelType<T> type, ModelType<E> elementType, ModelSchemaStore store, NodeInitializerRegistry nodeInitializerRegistry);
 }

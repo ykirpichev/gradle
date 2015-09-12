@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 the original author or authors.
+ * Copyright 2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,19 @@
 
 package org.gradle.model.internal.manage.schema.extract;
 
+import org.gradle.model.internal.core.NodeInitializer;
 import org.gradle.model.internal.core.NodeInitializerRegistry;
+import org.gradle.model.internal.inspect.ManagedModelInitializer;
+import org.gradle.model.internal.manage.schema.ModelManagedImplStructSchema;
 import org.gradle.model.internal.manage.schema.ModelSchemaStore;
-import org.gradle.model.internal.manage.schema.ModelValueSchema;
-import org.gradle.model.internal.manage.schema.cache.ModelSchemaCache;
-import org.gradle.model.internal.type.ModelType;
 
-public class PrimitiveStrategy implements ModelSchemaExtractionStrategy {
-
-    public <T> ModelSchemaExtractionResult<T> extractSchema(ModelSchemaExtractionContext<T> extractionContext, ModelSchemaStore store, ModelSchemaCache cache, NodeInitializerRegistry nodeInitializerRegistry) {
-        ModelType<T> type = extractionContext.getType();
-        if (type.getRawClass().isPrimitive()) {
-            return new ModelSchemaExtractionResult<T>(new ModelValueSchema<T>(type));
-        }
-
-        return null;
+public class ManagedImplStructNodeInitializerExtractionStrategy extends ManagedImplStructNodeInitializerExtractionSupport {
+    public ManagedImplStructNodeInitializerExtractionStrategy() {
+        super(null);
     }
 
+    @Override
+    protected <T> NodeInitializer extractNodeInitializer(ModelManagedImplStructSchema<T> schema, ModelSchemaStore schemaStore, NodeInitializerRegistry nodeInitializerRegistry) {
+        return new ManagedModelInitializer<T>(schema, schemaStore, nodeInitializerRegistry);
+    }
 }

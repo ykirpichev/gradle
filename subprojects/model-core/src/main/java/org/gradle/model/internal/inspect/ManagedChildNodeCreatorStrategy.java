@@ -40,7 +40,7 @@ public class ManagedChildNodeCreatorStrategy<T> implements ChildNodeInitializerS
         if (!(schema instanceof ManagedImplModelSchema)) {
             throw new IllegalArgumentException("Type is not managed: " + type);
         }
-        return nodeInitializerRegistry.getNodeInitializer((ManagedImplModelSchema<?>) schema);
+        return nodeInitializerRegistry.getNodeInitializer((ManagedImplModelSchema<?>) schema, schemaStore);
     }
 
 }

@@ -19,7 +19,7 @@ package org.gradle.model.internal.registry
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.model.*
-import org.gradle.model.internal.core.DefaultNodeInitializerRegistry
+import org.gradle.model.internal.manage.schema.DefaultNodeInitializerRegistry
 import org.gradle.model.internal.core.DependencyOnlyExtractedModelRule
 import org.gradle.model.internal.core.ExtractedModelRule
 import org.gradle.model.internal.core.ModelRuleExecutionException

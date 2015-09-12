@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package org.gradle.model.internal.core;
+package org.gradle.model.internal.manage.schema.extract;
 
+import org.gradle.model.internal.core.NodeInitializer;
+import org.gradle.model.internal.core.NodeInitializerRegistry;
 import org.gradle.model.internal.manage.schema.ManagedImplModelSchema;
+import org.gradle.model.internal.manage.schema.ModelSchemaStore;
 
-public class DefaultNodeInitializerRegistry implements NodeInitializerRegistry {
-    @Override
-    public <T> NodeInitializer getNodeInitializer(ManagedImplModelSchema<T> schema) {
-        return schema.getNodeInitializer();
-    }
+public interface NodeInitializerExtractionStrategy {
+    <T> NodeInitializer extractNodeInitializer(ManagedImplModelSchema<T> schema, ModelSchemaStore schemaStore, NodeInitializerRegistry nodeInitializerRegistry);
 }

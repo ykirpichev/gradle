@@ -22,6 +22,7 @@ import org.gradle.model.Managed
 import org.gradle.model.ModelMap
 import org.gradle.model.ModelSet
 import org.gradle.model.Unmanaged
+import org.gradle.model.internal.core.NodeInitializerRegistry
 import org.gradle.model.internal.manage.schema.*
 import org.gradle.model.internal.manage.schema.cache.ModelSchemaCache
 import org.gradle.model.internal.type.ModelType
@@ -946,7 +947,7 @@ interface Managed${typeName} {
     def "can register custom strategy"() {
         when:
         def strategy = Mock(ModelSchemaExtractionStrategy) {
-            extract(_, _, _) >> { ModelSchemaExtractionContext extractionContext, ModelSchemaStore store, ModelSchemaCache schemaCache ->
+            extractSchema(_, _, _, _) >> { ModelSchemaExtractionContext extractionContext, ModelSchemaStore store, ModelSchemaCache cache, NodeInitializerRegistry nodeInitializerRegistry ->
                 if (extractionContext.type.rawClass == CustomThing) {
                     return new ModelSchemaExtractionResult(new ModelValueSchema<?>(extractionContext.type))
                 } else {

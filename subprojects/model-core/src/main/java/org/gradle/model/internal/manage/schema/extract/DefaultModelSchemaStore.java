@@ -19,7 +19,7 @@ package org.gradle.model.internal.manage.schema.extract;
 import com.google.common.collect.ImmutableList;
 import net.jcip.annotations.NotThreadSafe;
 import org.gradle.internal.Cast;
-import org.gradle.model.internal.core.DefaultNodeInitializerRegistry;
+import org.gradle.model.internal.manage.schema.DefaultNodeInitializerRegistry;
 import org.gradle.model.internal.core.NodeInitializerRegistry;
 import org.gradle.model.internal.manage.schema.ModelSchema;
 import org.gradle.model.internal.manage.schema.ModelSchemaStore;

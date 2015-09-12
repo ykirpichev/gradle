@@ -36,7 +36,7 @@ public class SpecializedMapStrategy implements ModelSchemaExtractionStrategy {
 
     @Nullable
     @Override
-    public <T> ModelSchemaExtractionResult<T> extract(ModelSchemaExtractionContext<T> extractionContext, ModelSchemaStore store, ModelSchemaCache cache, NodeInitializerRegistry nodeInitializerRegistry) {
+    public <T> ModelSchemaExtractionResult<T> extractSchema(ModelSchemaExtractionContext<T> extractionContext, ModelSchemaStore store, ModelSchemaCache cache, NodeInitializerRegistry nodeInitializerRegistry) {
         Type type = extractionContext.getType().getType();
         if (!(type instanceof Class)) {
             return null;

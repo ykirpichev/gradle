@@ -20,7 +20,7 @@ import org.gradle.api.internal.ClosureBackedAction
 import org.gradle.model.Managed
 import org.gradle.model.ModelSet
 import org.gradle.model.ModelViewClosedException
-import org.gradle.model.internal.core.DefaultNodeInitializerRegistry
+import org.gradle.model.internal.manage.schema.DefaultNodeInitializerRegistry
 import org.gradle.model.internal.core.ModelCreators
 import org.gradle.model.internal.core.ModelPath
 import org.gradle.model.internal.core.ModelReference
@@ -55,7 +55,7 @@ class ModelSetModelProjectionTest extends Specification {
         def collectionSchema = schemaStore.getSchema(collectionType)
         assert collectionSchema instanceof ManagedImplModelSchema
         registry.create(
-            ModelCreators.of(collectionPath, nodeInitializerRegistry.getNodeInitializer(collectionSchema))
+            ModelCreators.of(collectionPath, nodeInitializerRegistry.getNodeInitializer(collectionSchema, schemaStore))
                 .descriptor("define collection")
                 .build()
         )

@@ -18,9 +18,7 @@ package org.gradle.model.internal.manage.schema.extract;
 
 import org.gradle.api.Action;
 import org.gradle.model.internal.core.MutableModelNode;
-import org.gradle.model.internal.core.NodeInitializer;
 import org.gradle.model.internal.core.NodeInitializerRegistry;
-import org.gradle.model.internal.inspect.ManagedModelInitializer;
 import org.gradle.model.internal.manage.instance.ManagedProxyFactory;
 import org.gradle.model.internal.manage.instance.ModelElementState;
 import org.gradle.model.internal.manage.schema.ModelManagedImplStructSchema;
@@ -61,11 +59,6 @@ public class ManagedImplStructStrategy extends ManagedImplStructSchemaExtraction
             }
         });
         return schema;
-    }
-
-    @Override
-    protected <R> NodeInitializer createNodeInitializer(ModelManagedImplStructSchema<R> schema, NodeInitializerRegistry nodeInitializerRegistry) {
-        return new ManagedModelInitializer<R>(schema, nodeInitializerRegistry);
     }
 
     private <R> void ensureCanBeInstantiated(ModelSchemaExtractionContext<R> extractionContext, ModelManagedImplStructSchema<R> schema) {

@@ -78,7 +78,7 @@ public class NonTransformedModelDslBacking extends GroovyObjectSupport {
         if (!(schema instanceof ManagedImplModelSchema)) {
             throw new InvalidModelRuleDeclarationException(descriptor, "Cannot create an element of type " + type.getName() + " as it is not a managed type");
         }
-        NodeInitializer nodeInitializer = nodeInitializerRegistry.getNodeInitializer((ManagedImplModelSchema<?>) schema);
+        NodeInitializer nodeInitializer = nodeInitializerRegistry.getNodeInitializer((ManagedImplModelSchema<?>) schema, modelSchemaStore);
 
         modelRegistry.create(
             ModelCreators.of(modelPath, nodeInitializer)

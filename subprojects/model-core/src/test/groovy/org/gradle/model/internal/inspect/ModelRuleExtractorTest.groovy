@@ -17,7 +17,7 @@
 package org.gradle.model.internal.inspect
 
 import org.gradle.model.*
-import org.gradle.model.internal.core.DefaultNodeInitializerRegistry
+import org.gradle.model.internal.manage.schema.DefaultNodeInitializerRegistry
 import org.gradle.model.internal.core.ExtractedModelRule
 import org.gradle.model.internal.core.ModelCreators
 import org.gradle.model.internal.core.ModelPath

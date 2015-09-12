@@ -16,48 +16,21 @@
 
 package org.gradle.model.internal.manage.schema;
 
-import org.gradle.model.internal.core.*;
 import org.gradle.model.internal.type.ModelType;
-
-import java.util.Collections;
-import java.util.List;
 
 public class ModelCollectionSchema<T, E> extends AbstractModelSchema<T> implements ManagedImplModelSchema<T> {
 
     private final ModelType<T> type;
     private final ModelType<E> elementType;
-    private final ModelProjection projection;
-    private final NodeInitializer nodeInitializer;
 
-    public ModelCollectionSchema(ModelType<T> type, ModelType<E> elementType, ModelProjection projection) {
+    public ModelCollectionSchema(ModelType<T> type, ModelType<E> elementType) {
         super(type);
         this.type = type;
         this.elementType = elementType;
-        this.projection = projection;
-        this.nodeInitializer = new NodeInitializer() {
-            @Override
-            public List<? extends ModelProjection> getProjections() {
-                return Collections.singletonList(ModelCollectionSchema.this.projection);
-            }
-
-            @Override
-            public void execute(MutableModelNode modelNode, List<ModelView<?>> inputs) {
-            }
-
-            @Override
-            public List<? extends ModelReference<?>> getInputs() {
-                return Collections.emptyList();
-            }
-        };
     }
 
     public ModelType<E> getElementType() {
         return elementType;
-    }
-
-    @Override
-    public NodeInitializer getNodeInitializer() {
-        return nodeInitializer;
     }
 
     @Override

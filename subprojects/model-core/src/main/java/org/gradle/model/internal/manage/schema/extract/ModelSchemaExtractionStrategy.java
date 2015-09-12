@@ -24,6 +24,6 @@ import org.gradle.model.internal.manage.schema.cache.ModelSchemaCache;
 public interface ModelSchemaExtractionStrategy {
 
     @Nullable
-    <T> ModelSchemaExtractionResult<T> extract(ModelSchemaExtractionContext<T> extractionContext, ModelSchemaStore store, ModelSchemaCache cache, NodeInitializerRegistry nodeInitializerRegistry);
+    <T> ModelSchemaExtractionResult<T> extractSchema(ModelSchemaExtractionContext<T> extractionContext, ModelSchemaStore store, ModelSchemaCache cache, NodeInitializerRegistry nodeInitializerRegistry);
 
 }

@@ -19,6 +19,7 @@ import org.gradle.api.internal.ClosureBackedAction
 import org.gradle.model.ModelViewClosedException
 import org.gradle.model.internal.core.*
 import org.gradle.model.internal.fixture.ModelRegistryHelper
+import org.gradle.model.internal.manage.schema.DefaultNodeInitializerRegistry
 import org.gradle.model.internal.manage.schema.ManagedImplModelSchema
 import org.gradle.model.internal.manage.schema.ModelStructSchema
 import org.gradle.model.internal.manage.schema.extract.DefaultModelSchemaStore
@@ -34,7 +35,7 @@ abstract class AbstractCollectionModelProjectionTest<T, C extends Collection<T>>
     def internalType
     def internalTypeSchema
     def collectionProperty
-    private ModelType<C> collectionType
+    ModelType<C> collectionType
     private ModelReference<C> reference
 
     abstract Class<?> holderType()
@@ -51,7 +52,7 @@ abstract class AbstractCollectionModelProjectionTest<T, C extends Collection<T>>
         collectionType = collectionProperty.type as ModelType<C>
         def collectionSchema = schemaStore.getSchema(collectionType)
         assert collectionSchema instanceof ManagedImplModelSchema
-        def nodeInitializer = nodeInitializerRegistry.getNodeInitializer(collectionSchema)
+        def nodeInitializer = nodeInitializerRegistry.getNodeInitializer(collectionSchema, schemaStore)
         reference = ModelReference.of(collectionPath, collectionType)
         registry.create(
             ModelCreators.of(collectionPath, nodeInitializer)

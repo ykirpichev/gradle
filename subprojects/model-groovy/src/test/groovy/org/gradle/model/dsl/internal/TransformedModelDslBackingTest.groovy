@@ -21,7 +21,7 @@ import org.gradle.model.Managed
 import org.gradle.model.dsl.internal.inputs.RuleInputAccessBacking
 import org.gradle.model.dsl.internal.transform.InputReferences
 import org.gradle.model.dsl.internal.transform.SourceLocation
-import org.gradle.model.internal.core.DefaultNodeInitializerRegistry
+import org.gradle.model.internal.manage.schema.DefaultNodeInitializerRegistry
 import org.gradle.model.internal.core.ModelCreators
 import org.gradle.model.internal.core.ModelPath
 import org.gradle.model.internal.core.ModelReference

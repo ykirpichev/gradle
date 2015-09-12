@@ -36,12 +36,14 @@ public class ManagedModelProjection<M> extends TypeCompatibilityModelProjectionS
 
     private final ModelManagedImplStructSchema<M> schema;
     private final ManagedProxyFactory proxyFactory;
+    private final ModelSchemaStore schemaStore;
     private final NodeInitializerRegistry nodeInitializerRegistry;
 
-    public ManagedModelProjection(ModelManagedImplStructSchema<M> schema, ManagedProxyFactory proxyFactory, NodeInitializerRegistry nodeInitializerRegistry) {
+    public ManagedModelProjection(ModelManagedImplStructSchema<M> schema, ManagedProxyFactory proxyFactory, ModelSchemaStore schemaStore, NodeInitializerRegistry nodeInitializerRegistry) {
         super(schema.getType(), true, true);
         this.schema = schema;
         this.proxyFactory = proxyFactory;
+        this.schemaStore = schemaStore;
         this.nodeInitializerRegistry = nodeInitializerRegistry;
     }
 
@@ -162,7 +164,7 @@ public class ManagedModelProjection<M> extends TypeCompatibilityModelProjectionS
 
                 private <T, E> void initializeCollection(MutableModelNode propertyNode, ModelType<T> propertyType, ScalarCollectionSchema<T, E> propertySchema, Collection<E> value) {
                     ScalarCollectionSchema.clear(propertyNode);
-                    NodeInitializer initializer = nodeInitializerRegistry.getNodeInitializer(propertySchema);
+                    NodeInitializer initializer = nodeInitializerRegistry.getNodeInitializer(propertySchema, schemaStore);
                     List<? extends ModelProjection> projections = initializer.getProjections();
                     for (ModelProjection projection : projections) {
                         ModelView<? extends T> modelView = projection.asWritable(propertyType, propertyNode, ruleDescriptor, null);
