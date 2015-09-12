@@ -24,6 +24,7 @@ import org.gradle.api.internal.rules.ModelMapCreators;
 import org.gradle.api.internal.rules.NamedDomainObjectFactoryRegistry;
 import org.gradle.api.plugins.ExtensionContainer;
 import org.gradle.api.tasks.TaskContainer;
+import org.gradle.internal.Factories;
 import org.gradle.internal.reflect.Instantiator;
 import org.gradle.internal.service.ServiceRegistry;
 import org.gradle.internal.util.BiFunction;
@@ -35,10 +36,7 @@ import org.gradle.language.base.internal.model.ComponentBinaryRules;
 import org.gradle.language.base.internal.model.ComponentRules;
 import org.gradle.language.base.internal.registry.*;
 import org.gradle.model.*;
-import org.gradle.model.internal.core.ModelCreator;
-import org.gradle.model.internal.core.ModelPath;
-import org.gradle.model.internal.core.ModelReference;
-import org.gradle.model.internal.core.MutableModelNode;
+import org.gradle.model.internal.core.*;
 import org.gradle.model.internal.core.rule.describe.SimpleModelRuleDescriptor;
 import org.gradle.model.internal.manage.schema.ModelSchemaStore;
 import org.gradle.model.internal.manage.schema.SpecializedMapSchema;
@@ -85,6 +83,13 @@ public class ComponentModelBasePlugin implements Plugin<ProjectInternal> {
             descriptor
         );
         modelRegistry.create(componentsCreator);
+
+        modelRegistry.createOrReplace(ModelCreators.unmanagedInstance(ModelReference.of(ModelPath.path("__modelSchemaStore"), ModelType.of(ModelSchemaStore.class)), Factories.constant(schemaStore))
+            .descriptor(descriptor)
+            .ephemeral(true)
+            .hidden(true)
+            .build());
+
         modelRegistry.getRoot().applyToAllLinksTransitive(ModelType.of(ComponentSpec.class), ComponentRules.class);
         modelRegistry.getRoot().applyToAllLinksTransitive(ModelType.of(ComponentSpec.class), ComponentBinaryRules.class);
     }
