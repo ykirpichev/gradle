@@ -17,6 +17,8 @@
 package org.gradle.model.internal.manage.schema;
 
 import com.google.common.collect.ImmutableList;
+import org.gradle.model.internal.core.DefaultInstanceFactoryRegistry;
+import org.gradle.model.internal.core.InstanceFactoryRegistry;
 import org.gradle.model.internal.core.NodeInitializer;
 import org.gradle.model.internal.core.NodeInitializerRegistry;
 import org.gradle.model.internal.manage.schema.extract.*;
@@ -28,12 +30,13 @@ public class DefaultNodeInitializerRegistry implements NodeInitializerRegistry {
     private final List<NodeInitializerExtractionStrategy> strategies;
 
     public DefaultNodeInitializerRegistry() {
-        this(Collections.<NodeInitializerExtractionStrategy>emptyList());
+        this(new DefaultInstanceFactoryRegistry(), Collections.<NodeInitializerExtractionStrategy>emptyList());
     }
 
-    public DefaultNodeInitializerRegistry(List<NodeInitializerExtractionStrategy> strategies) {
+    public DefaultNodeInitializerRegistry(InstanceFactoryRegistry instanceFactoryRegistry, List<NodeInitializerExtractionStrategy> strategies) {
         this.strategies = ImmutableList.<NodeInitializerExtractionStrategy>builder()
             .addAll(strategies)
+            .add(new FactoryBasedNodeInitializerExtractionStrategy(instanceFactoryRegistry))
             .add(new ModelSetNodeInitializerExtractionStrategy())
             .add(new ManagedSetNodeInitializerExtractionStrategy())
             .add(new ModelMapNodeInitializerExtractionStrategy())

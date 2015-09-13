@@ -56,6 +56,8 @@ import org.gradle.messaging.remote.MessagingServer;
 import org.gradle.messaging.remote.internal.MessagingServices;
 import org.gradle.messaging.remote.internal.inet.InetAddressFactory;
 import org.gradle.model.internal.DynamicObjectAwareTypeUtils;
+import org.gradle.model.internal.core.DefaultInstanceFactoryRegistry;
+import org.gradle.model.internal.core.InstanceFactoryRegistry;
 import org.gradle.model.internal.manage.schema.DefaultNodeInitializerRegistry;
 import org.gradle.model.internal.core.NodeInitializerRegistry;
 import org.gradle.model.internal.inspect.MethodModelRuleExtractor;
@@ -232,9 +234,13 @@ public class GlobalScopeServices {
         return new ModelSchemaExtractor(strategies, aspectExtractor);
     }
 
-    protected NodeInitializerRegistry createNodeInitializerRegistry(ServiceRegistry serviceRegistry) {
+    protected InstanceFactoryRegistry createInstanceFactoryRegistry() {
+        return new DefaultInstanceFactoryRegistry();
+    }
+
+    protected NodeInitializerRegistry createNodeInitializerRegistry(ServiceRegistry serviceRegistry, InstanceFactoryRegistry instanceFactoryRegistry) {
         List<NodeInitializerExtractionStrategy> strategies = serviceRegistry.getAll(NodeInitializerExtractionStrategy.class);
-        return new DefaultNodeInitializerRegistry(strategies);
+        return new DefaultNodeInitializerRegistry(instanceFactoryRegistry, strategies);
     }
 
     protected ModelSchemaStore createModelSchemaStore(ModelSchemaExtractor modelSchemaExtractor, NodeInitializerRegistry nodeInitializerRegistry) {

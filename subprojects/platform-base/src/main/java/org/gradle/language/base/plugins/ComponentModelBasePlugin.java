@@ -60,11 +60,13 @@ import static org.apache.commons.lang.StringUtils.capitalize;
 public class ComponentModelBasePlugin implements Plugin<ProjectInternal> {
     private final ModelRegistry modelRegistry;
     private final ModelSchemaStore schemaStore;
+    private final InstanceFactoryRegistry instanceFactoryRegistry;
 
     @Inject
-    public ComponentModelBasePlugin(ModelRegistry modelRegistry, ModelSchemaStore schemaStore) {
+    public ComponentModelBasePlugin(ModelRegistry modelRegistry, ModelSchemaStore schemaStore, InstanceFactoryRegistry instanceFactoryRegistry) {
         this.modelRegistry = modelRegistry;
         this.schemaStore = schemaStore;
+        this.instanceFactoryRegistry = instanceFactoryRegistry;
     }
 
     public void apply(final ProjectInternal project) {
@@ -85,6 +87,12 @@ public class ComponentModelBasePlugin implements Plugin<ProjectInternal> {
         modelRegistry.create(componentsCreator);
 
         modelRegistry.createOrReplace(ModelCreators.unmanagedInstance(ModelReference.of(ModelPath.path("__modelSchemaStore"), ModelType.of(ModelSchemaStore.class)), Factories.constant(schemaStore))
+            .descriptor(descriptor)
+            .ephemeral(true)
+            .hidden(true)
+            .build());
+
+        modelRegistry.createOrReplace(ModelCreators.unmanagedInstance(ModelReference.of(ModelPath.path("__instanceFactoryRegistry"), ModelType.of(InstanceFactoryRegistry.class)), Factories.constant(instanceFactoryRegistry))
             .descriptor(descriptor)
             .ephemeral(true)
             .hidden(true)
@@ -182,6 +190,16 @@ public class ComponentModelBasePlugin implements Plugin<ProjectInternal> {
                 }
             });
             return binarySpecFactory;
+        }
+
+        @Mutate
+        void registerInstanceFactories(InstanceFactoryRegistry instanceFactoryRegistry, BinarySpecFactory binarySpecFactory, ComponentSpecFactory componentSpecFactory) {
+            for (Class<? extends BinarySpec> type : binarySpecFactory.getSupportedTypes()) {
+                instanceFactoryRegistry.register(ModelType.of(type), ModelReference.of(BinarySpecFactory.class));
+            }
+            for (Class<? extends ComponentSpec> type : componentSpecFactory.getSupportedTypes()) {
+                instanceFactoryRegistry.register(ModelType.of(type), ModelReference.of(ComponentSpecFactory.class));
+            }
         }
 
         @Defaults
