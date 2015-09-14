@@ -37,8 +37,8 @@ class TransformedModelDslBackingTest extends Specification {
     def referenceExtractor = Mock(Transformer)
     def locationExtractor = Mock(Transformer)
     def schemaStore = DefaultModelSchemaStore.instance
-    def nodeInitializerRegistry = new DefaultNodeInitializerRegistry()
-    def modelDsl = new TransformedModelDslBacking(getModelRegistry(), schemaStore, nodeInitializerRegistry, referenceExtractor, locationExtractor)
+    def nodeInitializerRegistry = new DefaultNodeInitializerRegistry(schemaStore)
+    def modelDsl = new TransformedModelDslBacking(getModelRegistry(), nodeInitializerRegistry, referenceExtractor, locationExtractor)
 
     void register(String pathString, Object element) {
         modelRegistry.create(ModelCreators.bridgedInstance(ModelReference.of(pathString, element.class), element).descriptor("register").build())

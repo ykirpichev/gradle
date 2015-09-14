@@ -20,7 +20,6 @@ import org.gradle.jvm.JarBinarySpec;
 import org.gradle.model.internal.core.NodeInitializer;
 import org.gradle.model.internal.core.NodeInitializerRegistry;
 import org.gradle.model.internal.manage.schema.ModelManagedImplStructSchema;
-import org.gradle.model.internal.manage.schema.ModelSchemaStore;
 import org.gradle.model.internal.manage.schema.extract.ManagedImplStructNodeInitializerExtractionSupport;
 
 public class JarBinarySpecSpecializationNodeInitializerExtractionStrategy extends ManagedImplStructNodeInitializerExtractionSupport {
@@ -29,7 +28,7 @@ public class JarBinarySpecSpecializationNodeInitializerExtractionStrategy extend
     }
 
     @Override
-    protected <T> NodeInitializer extractNodeInitializer(ModelManagedImplStructSchema<T> schema, ModelSchemaStore schemaStore, NodeInitializerRegistry nodeInitializerRegistry) {
-        return new JarBinarySpecSpecializationModelInitializer<T>(schema, schemaStore, nodeInitializerRegistry);
+    protected <T> NodeInitializer extractNodeInitializer(ModelManagedImplStructSchema<T> schema, NodeInitializerRegistry nodeInitializerRegistry) {
+        return new JarBinarySpecSpecializationModelInitializer<T>(schema, nodeInitializerRegistry);
     }
 }

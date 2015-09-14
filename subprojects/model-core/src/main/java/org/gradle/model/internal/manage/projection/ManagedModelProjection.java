@@ -36,14 +36,12 @@ public class ManagedModelProjection<M> extends TypeCompatibilityModelProjectionS
 
     private final ModelManagedImplStructSchema<M> schema;
     private final ManagedProxyFactory proxyFactory;
-    private final ModelSchemaStore schemaStore;
     private final NodeInitializerRegistry nodeInitializerRegistry;
 
-    public ManagedModelProjection(ModelManagedImplStructSchema<M> schema, ManagedProxyFactory proxyFactory, ModelSchemaStore schemaStore, NodeInitializerRegistry nodeInitializerRegistry) {
+    public ManagedModelProjection(ModelManagedImplStructSchema<M> schema, ManagedProxyFactory proxyFactory, NodeInitializerRegistry nodeInitializerRegistry) {
         super(schema.getType(), true, true);
         this.schema = schema;
         this.proxyFactory = proxyFactory;
-        this.schemaStore = schemaStore;
         this.nodeInitializerRegistry = nodeInitializerRegistry;
     }
 
@@ -151,8 +149,7 @@ public class ManagedModelProjection<M> extends TypeCompatibilityModelProjectionS
                             propertyNode.setTarget(targetNode);
                         } else if (propertySchema instanceof ScalarCollectionSchema && Collection.class.isInstance(value)) {
                             Collection<Object> values = Cast.uncheckedCast(value);
-                            ScalarCollectionSchema<T, Object> scalarSchema = Cast.uncheckedCast(propertySchema);
-                            initializeCollection(propertyNode, propertyType, scalarSchema, values);
+                            initializeCollection(propertyNode, propertyType, values);
                         } else {
                             throw new IllegalArgumentException(String.format("Only managed model instances can be set as property '%s' of class '%s'", name, getType()));
                         }
@@ -162,9 +159,9 @@ public class ManagedModelProjection<M> extends TypeCompatibilityModelProjectionS
                     }
                 }
 
-                private <T, E> void initializeCollection(MutableModelNode propertyNode, ModelType<T> propertyType, ScalarCollectionSchema<T, E> propertySchema, Collection<E> value) {
+                private <T, E> void initializeCollection(MutableModelNode propertyNode, ModelType<T> propertyType, Collection<E> value) {
                     ScalarCollectionSchema.clear(propertyNode);
-                    NodeInitializer initializer = nodeInitializerRegistry.getNodeInitializer(propertySchema, schemaStore);
+                    NodeInitializer initializer = nodeInitializerRegistry.getNodeInitializer(propertyType);
                     List<? extends ModelProjection> projections = initializer.getProjections();
                     for (ModelProjection projection : projections) {
                         ModelView<? extends T> modelView = projection.asWritable(propertyType, propertyNode, ruleDescriptor, null);

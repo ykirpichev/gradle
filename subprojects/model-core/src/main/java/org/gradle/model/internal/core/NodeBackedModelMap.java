@@ -29,9 +29,6 @@ import org.gradle.model.RuleSource;
 import org.gradle.model.internal.core.rule.describe.ModelRuleDescriptor;
 import org.gradle.model.internal.core.rule.describe.NestedModelRuleDescriptor;
 import org.gradle.model.internal.manage.instance.ManagedInstance;
-import org.gradle.model.internal.manage.schema.ManagedImplModelSchema;
-import org.gradle.model.internal.manage.schema.ModelSchema;
-import org.gradle.model.internal.manage.schema.ModelSchemaStore;
 import org.gradle.model.internal.type.ModelType;
 
 import java.util.*;
@@ -106,13 +103,13 @@ public class NodeBackedModelMap<T> implements ModelMap<T>, ManagedInstance {
         };
     }
 
-    public static <T> ChildNodeInitializerStrategy<T> createManagedOrUsingFactory(final ModelSchemaStore schemaStore, final NodeInitializerRegistry nodeInitializerRegistry, final ModelReference<? extends InstanceFactory<? super T, String>> factoryReference) {
+    public static <T> ChildNodeInitializerStrategy<T> createManagedOrUsingFactory(final NodeInitializerRegistry nodeInitializerRegistry, final ModelReference<? extends InstanceFactory<? super T, String>> factoryReference) {
         return new ChildNodeInitializerStrategy<T>() {
             @Override
             public <S extends T> NodeInitializer initializer(final ModelType<S> type) {
-                ModelSchema<S> schema = schemaStore.getSchema(type);
-                if (schema instanceof ManagedImplModelSchema) {
-                    return nodeInitializerRegistry.getNodeInitializer((ManagedImplModelSchema<?>) schema, schemaStore);
+                NodeInitializer nodeInitializer = nodeInitializerRegistry.getNodeInitializer(type);
+                if (nodeInitializer != null) {
+                    return nodeInitializer;
                 } else {
                     return new FactoryBasedNodeInitializer<T, S>(factoryReference, type);
                 }

@@ -33,9 +33,6 @@ import org.gradle.model.dsl.internal.transform.RulesBlock;
 import org.gradle.model.dsl.internal.transform.SourceLocation;
 import org.gradle.model.internal.core.*;
 import org.gradle.model.internal.core.rule.describe.ModelRuleDescriptor;
-import org.gradle.model.internal.manage.schema.ManagedImplModelSchema;
-import org.gradle.model.internal.manage.schema.ModelSchema;
-import org.gradle.model.internal.manage.schema.ModelSchemaStore;
 import org.gradle.model.internal.registry.ModelRegistry;
 import org.gradle.model.internal.type.ModelType;
 
@@ -59,15 +56,13 @@ public class TransformedModelDslBacking {
     private final NodeInitializerRegistry nodeInitializerRegistry;
     private final Transformer<? extends InputReferences, ? super Closure<?>> inputPathsExtractor;
     private final Transformer<SourceLocation, ? super Closure<?>> ruleLocationExtractor;
-    private final ModelSchemaStore schemaStore;
 
-    public TransformedModelDslBacking(ModelRegistry modelRegistry, ModelSchemaStore schemaStore, NodeInitializerRegistry nodeInitializerRegistry, RelativeFilePathResolver relativeFilePathResolver) {
-        this(modelRegistry, schemaStore, nodeInitializerRegistry, INPUT_PATHS_EXTRACTOR, new RelativePathSourceLocationTransformer(relativeFilePathResolver));
+    public TransformedModelDslBacking(ModelRegistry modelRegistry, NodeInitializerRegistry nodeInitializerRegistry, RelativeFilePathResolver relativeFilePathResolver) {
+        this(modelRegistry, nodeInitializerRegistry, INPUT_PATHS_EXTRACTOR, new RelativePathSourceLocationTransformer(relativeFilePathResolver));
     }
 
-    TransformedModelDslBacking(ModelRegistry modelRegistry, ModelSchemaStore schemaStore, NodeInitializerRegistry nodeInitializerRegistry, Transformer<? extends InputReferences, ? super Closure<?>> inputPathsExtractor, Transformer<SourceLocation, ? super Closure<?>> ruleLocationExtractor) {
+    TransformedModelDslBacking(ModelRegistry modelRegistry, NodeInitializerRegistry nodeInitializerRegistry, Transformer<? extends InputReferences, ? super Closure<?>> inputPathsExtractor, Transformer<SourceLocation, ? super Closure<?>> ruleLocationExtractor) {
         this.modelRegistry = modelRegistry;
-        this.schemaStore = schemaStore;
         this.nodeInitializerRegistry = nodeInitializerRegistry;
         this.inputPathsExtractor = inputPathsExtractor;
         this.ruleLocationExtractor = ruleLocationExtractor;
@@ -83,12 +78,11 @@ public class TransformedModelDslBacking {
     public <T> void create(String modelPathString, @DelegatesTo.Target Class<T> type, @DelegatesTo(genericTypeIndex = 0) Closure<?> closure) {
         SourceLocation sourceLocation = ruleLocationExtractor.transform(closure);
         ModelPath modelPath = ModelPath.path(modelPathString);
-        ModelSchema<T> schema = schemaStore.getSchema(ModelType.of(type));
         ModelRuleDescriptor descriptor = toDescriptor(sourceLocation, modelPath);
-        if (!(schema instanceof ManagedImplModelSchema)) {
+        NodeInitializer nodeInitializer = nodeInitializerRegistry.getNodeInitializer(ModelType.of(type));
+        if (nodeInitializer == null) {
             throw new InvalidModelRuleDeclarationException(descriptor, "Cannot create an element of type " + type.getName() + " as it is not a managed type");
         }
-        NodeInitializer nodeInitializer = nodeInitializerRegistry.getNodeInitializer((ManagedImplModelSchema<?>) schema, schemaStore);
         modelRegistry.create(ModelCreators.of(modelPath, nodeInitializer).descriptor(descriptor).build());
         registerAction(modelPath, type, descriptor, ModelActionRole.Initialize, closure);
     }

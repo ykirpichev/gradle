@@ -24,7 +24,6 @@ import org.gradle.model.internal.core.NodeInitializerRegistry;
 import org.gradle.model.internal.inspect.ManagedChildNodeCreatorStrategy;
 import org.gradle.model.internal.inspect.ProjectionOnlyNodeInitializer;
 import org.gradle.model.internal.manage.schema.ModelCollectionSchema;
-import org.gradle.model.internal.manage.schema.ModelSchemaStore;
 import org.gradle.model.internal.type.ModelType;
 
 public class ModelMapNodeInitializerExtractionStrategy extends CollectionNodeInitializerExtractionSupport {
@@ -32,9 +31,9 @@ public class ModelMapNodeInitializerExtractionStrategy extends CollectionNodeIni
     };
 
     @Override
-    protected <T, E> NodeInitializer extractNodeInitializer(ModelCollectionSchema<T, E> schema, ModelSchemaStore schemaStore, NodeInitializerRegistry nodeInitializerRegistry) {
+    protected <T, E> NodeInitializer extractNodeInitializer(ModelCollectionSchema<T, E> schema, NodeInitializerRegistry nodeInitializerRegistry) {
         if (MODEL_MAP_MODEL_TYPE.isAssignableFrom(schema.getType())) {
-            ManagedChildNodeCreatorStrategy<E> childCreator = new ManagedChildNodeCreatorStrategy<E>(schemaStore, nodeInitializerRegistry);
+            ManagedChildNodeCreatorStrategy<E> childCreator = new ManagedChildNodeCreatorStrategy<E>(nodeInitializerRegistry);
             ModelProjection projection = ModelMapModelProjection.managed(schema.getElementType(), childCreator);
             return new ProjectionOnlyNodeInitializer(projection);
         }

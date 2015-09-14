@@ -23,7 +23,6 @@ import org.gradle.model.internal.inspect.ManagedModelInitializer;
 import org.gradle.model.internal.manage.instance.ManagedProxyFactory;
 import org.gradle.model.internal.manage.projection.ManagedModelProjection;
 import org.gradle.model.internal.manage.schema.ModelManagedImplStructSchema;
-import org.gradle.model.internal.manage.schema.ModelSchemaStore;
 import org.gradle.platform.base.internal.BinarySpecFactory;
 
 import java.util.Collections;
@@ -31,8 +30,8 @@ import java.util.List;
 
 public class JarBinarySpecSpecializationModelInitializer<T> extends ManagedModelInitializer<T> {
 
-    public JarBinarySpecSpecializationModelInitializer(ModelManagedImplStructSchema<T> modelSchema, ModelSchemaStore store, NodeInitializerRegistry nodeInitializerRegistry) {
-        super(modelSchema, store, nodeInitializerRegistry);
+    public JarBinarySpecSpecializationModelInitializer(ModelManagedImplStructSchema<T> modelSchema, NodeInitializerRegistry nodeInitializerRegistry) {
+        super(modelSchema, nodeInitializerRegistry);
     }
 
     @Override
@@ -50,6 +49,6 @@ public class JarBinarySpecSpecializationModelInitializer<T> extends ManagedModel
 
     @Override
     public List<? extends ModelProjection> getProjections() {
-        return Collections.singletonList(new ManagedModelProjection<T>(modelSchema, ManagedProxyFactory.INSTANCE, schemaStore, nodeInitializerRegistry));
+        return Collections.singletonList(new ManagedModelProjection<T>(modelSchema, ManagedProxyFactory.INSTANCE, nodeInitializerRegistry));
     }
 }

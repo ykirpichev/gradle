@@ -238,9 +238,9 @@ public class GlobalScopeServices {
         return new DefaultInstanceFactoryRegistry();
     }
 
-    protected NodeInitializerRegistry createNodeInitializerRegistry(ServiceRegistry serviceRegistry, InstanceFactoryRegistry instanceFactoryRegistry) {
+    protected NodeInitializerRegistry createNodeInitializerRegistry(ServiceRegistry serviceRegistry, ModelSchemaStore schemaStore, InstanceFactoryRegistry instanceFactoryRegistry) {
         List<NodeInitializerExtractionStrategy> strategies = serviceRegistry.getAll(NodeInitializerExtractionStrategy.class);
-        return new DefaultNodeInitializerRegistry(instanceFactoryRegistry, strategies);
+        return new DefaultNodeInitializerRegistry(schemaStore, instanceFactoryRegistry, strategies);
     }
 
     protected ModelSchemaStore createModelSchemaStore(ModelSchemaExtractor modelSchemaExtractor) {

@@ -21,7 +21,6 @@ import org.gradle.model.internal.core.NodeInitializer;
 import org.gradle.model.internal.core.NodeInitializerRegistry;
 import org.gradle.model.internal.manage.schema.ModelManagedImplStructSchema;
 import org.gradle.model.internal.manage.schema.ModelSchema;
-import org.gradle.model.internal.manage.schema.ModelSchemaStore;
 import org.gradle.model.internal.type.ModelType;
 
 public abstract class ManagedImplStructNodeInitializerExtractionSupport implements NodeInitializerExtractionStrategy {
@@ -42,15 +41,15 @@ public abstract class ManagedImplStructNodeInitializerExtractionSupport implemen
     }
 
     @Override
-    public <T> NodeInitializer extractNodeInitializer(ModelSchema<T> schema, ModelSchemaStore schemaStore, NodeInitializerRegistry nodeInitializerRegistry) {
+    public <T> NodeInitializer extractNodeInitializer(ModelSchema<T> schema, NodeInitializerRegistry nodeInitializerRegistry) {
         if (!(schema instanceof ModelManagedImplStructSchema)) {
             return null;
         }
         if (!isTarget(schema.getType())) {
             return null;
         }
-        return extractNodeInitializer((ModelManagedImplStructSchema<T>) schema, schemaStore, nodeInitializerRegistry);
+        return extractNodeInitializer((ModelManagedImplStructSchema<T>) schema, nodeInitializerRegistry);
     }
 
-    protected abstract <T> NodeInitializer extractNodeInitializer(ModelManagedImplStructSchema<T> schema, ModelSchemaStore schemaStore, NodeInitializerRegistry nodeInitializerRegistry);
+    protected abstract <T> NodeInitializer extractNodeInitializer(ModelManagedImplStructSchema<T> schema, NodeInitializerRegistry nodeInitializerRegistry);
 }

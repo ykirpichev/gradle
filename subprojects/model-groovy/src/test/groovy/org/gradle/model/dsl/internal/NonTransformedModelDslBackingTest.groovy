@@ -24,6 +24,7 @@ import org.gradle.model.internal.core.ModelPath
 import org.gradle.model.internal.core.ModelReference
 import org.gradle.model.internal.core.ModelRuleExecutionException
 import org.gradle.model.internal.fixture.ModelRegistryHelper
+import org.gradle.model.internal.manage.schema.DefaultNodeInitializerRegistry
 import org.gradle.model.internal.manage.schema.extract.DefaultModelSchemaStore
 import org.gradle.model.internal.type.ModelType
 import spock.lang.Specification
@@ -32,7 +33,8 @@ class NonTransformedModelDslBackingTest extends Specification {
 
     def modelRegistry = new ModelRegistryHelper()
     def schemaStore = DefaultModelSchemaStore.instance
-    def modelDsl = new NonTransformedModelDslBacking(getModelRegistry(), schemaStore)
+    def nodeInitializerRegistry = new DefaultNodeInitializerRegistry(schemaStore)
+    def modelDsl = new NonTransformedModelDslBacking(getModelRegistry(), nodeInitializerRegistry)
 
     void register(String pathString, Object element) {
         modelRegistry.create(ModelCreators.bridgedInstance(ModelReference.of(pathString, element.class), element).descriptor("register").build())

@@ -970,9 +970,9 @@ public abstract class AbstractProject extends AbstractPluginAware implements Pro
         ModelSchemaStore modelSchemaStore = getModelSchemaStore();
         NodeInitializerRegistry nodeInitializerRegistry = getNodeInitializerRegistry();
         if (TransformedModelDslBacking.isTransformedBlock(modelRules)) {
-            ClosureBackedAction.execute(new TransformedModelDslBacking(modelRegistry, modelSchemaStore, nodeInitializerRegistry, this.getRootProject().getFileResolver()), modelRules);
+            ClosureBackedAction.execute(new TransformedModelDslBacking(modelRegistry, nodeInitializerRegistry, this.getRootProject().getFileResolver()), modelRules);
         } else {
-            new NonTransformedModelDslBacking(modelRegistry, modelSchemaStore, nodeInitializerRegistry).configure(modelRules);
+            new NonTransformedModelDslBacking(modelRegistry, nodeInitializerRegistry).configure(modelRules);
         }
     }
 

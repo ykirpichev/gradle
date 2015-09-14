@@ -22,7 +22,6 @@ import org.gradle.model.internal.core.rule.describe.ModelRuleDescriptor;
 import org.gradle.model.internal.inspect.ManagedChildNodeCreatorStrategy;
 import org.gradle.model.internal.inspect.ProjectionOnlyNodeInitializer;
 import org.gradle.model.internal.manage.schema.ModelCollectionSchema;
-import org.gradle.model.internal.manage.schema.ModelSchemaStore;
 import org.gradle.model.internal.type.ModelType;
 import org.gradle.model.internal.type.ModelTypes;
 
@@ -31,11 +30,11 @@ public class ManagedSetNodeInitializerExtractionStrategy extends CollectionNodeI
     };
 
     @Override
-    protected <T, E> NodeInitializer extractNodeInitializer(ModelCollectionSchema<T, E> schema, ModelSchemaStore schemaStore, NodeInitializerRegistry nodeInitializerRegistry) {
+    protected <T, E> NodeInitializer extractNodeInitializer(ModelCollectionSchema<T, E> schema, NodeInitializerRegistry nodeInitializerRegistry) {
         if (MANAGED_SET_MODEL_TYPE.isAssignableFrom(schema.getType())) {
             ModelProjection projection = TypedModelProjection.of(
                 ModelTypes.managedSet(schema.getElementType()),
-                new ManagedSetModelViewFactory<E>(schema.getElementType(), schemaStore, nodeInitializerRegistry)
+                new ManagedSetModelViewFactory<E>(schema.getElementType(), nodeInitializerRegistry)
             );
             return new ProjectionOnlyNodeInitializer(projection);
         }
@@ -44,12 +43,10 @@ public class ManagedSetNodeInitializerExtractionStrategy extends CollectionNodeI
 
     private static class ManagedSetModelViewFactory<T> implements ModelViewFactory<ManagedSet<T>> {
         private final ModelType<T> elementType;
-        private final ModelSchemaStore store;
         private final NodeInitializerRegistry nodeInitializerRegistry;
 
-        public ManagedSetModelViewFactory(ModelType<T> elementType, ModelSchemaStore store, NodeInitializerRegistry nodeInitializerRegistry) {
+        public ManagedSetModelViewFactory(ModelType<T> elementType, NodeInitializerRegistry nodeInitializerRegistry) {
             this.elementType = elementType;
-            this.store = store;
             this.nodeInitializerRegistry = nodeInitializerRegistry;
         }
 
@@ -57,7 +54,7 @@ public class ManagedSetNodeInitializerExtractionStrategy extends CollectionNodeI
         public ModelView<ManagedSet<T>> toView(MutableModelNode modelNode, ModelRuleDescriptor ruleDescriptor, boolean writable) {
             ModelType<ManagedSet<T>> setType = ModelTypes.managedSet(elementType);
             DefaultModelViewState state = new DefaultModelViewState(setType, ruleDescriptor, writable, !writable);
-            NodeBackedModelSet<T> set = new NodeBackedModelSet<T>(setType.toString() + " '" + modelNode.getPath() + "'", elementType, ruleDescriptor, modelNode, state, new ManagedChildNodeCreatorStrategy<T>(store, nodeInitializerRegistry));
+            NodeBackedModelSet<T> set = new NodeBackedModelSet<T>(setType.toString() + " '" + modelNode.getPath() + "'", elementType, ruleDescriptor, modelNode, state, new ManagedChildNodeCreatorStrategy<T>(nodeInitializerRegistry));
             return InstanceModelView.of(modelNode.getPath(), setType, set, state.closer());
         }
 

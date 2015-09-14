@@ -80,7 +80,7 @@ public class ManagedModelCreationRuleExtractor extends AbstractModelCreationRule
         }
 
         ManagedImplModelSchema<T> managedSchema = (ManagedImplModelSchema<T>) modelSchema;
-        NodeInitializer nodeInitializer = nodeInitializerRegistry.getNodeInitializer(managedSchema, schemaStore);
+        NodeInitializer nodeInitializer = nodeInitializerRegistry.getNodeInitializer(managedSchema);
 
         List<ModelReference<?>> bindings = ruleDefinition.getReferences();
         List<ModelReference<?>> inputs = bindings.subList(1, bindings.size());

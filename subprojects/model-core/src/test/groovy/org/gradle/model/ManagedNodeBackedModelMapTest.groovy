@@ -39,10 +39,10 @@ class ManagedNodeBackedModelMapTest extends Specification {
     def itemType = ModelType.of(NamedThingInterface)
     def modelMapType = ModelTypes.modelMap(itemType)
     def schemaStore = DefaultModelSchemaStore.instance
-    def nodeInitializerRegistry = new DefaultNodeInitializerRegistry()
+    def nodeInitializerRegistry = new DefaultNodeInitializerRegistry(schemaStore)
 
     def setup() {
-        registry.create(ModelCreators.of(path, nodeInitializerRegistry.getNodeInitializer(schemaStore.getSchema(modelMapType), schemaStore)).descriptor("creator").build())
+        registry.create(ModelCreators.of(path, nodeInitializerRegistry.getNodeInitializer(modelMapType)).descriptor("creator").build())
     }
 
     void mutate(@DelegatesTo(ModelMap) Closure<?> action) {

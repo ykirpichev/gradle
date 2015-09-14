@@ -22,7 +22,6 @@ import org.gradle.model.internal.core.rule.describe.ModelRuleDescriptor;
 import org.gradle.model.internal.inspect.ManagedChildNodeCreatorStrategy;
 import org.gradle.model.internal.inspect.ProjectionOnlyNodeInitializer;
 import org.gradle.model.internal.manage.schema.ModelCollectionSchema;
-import org.gradle.model.internal.manage.schema.ModelSchemaStore;
 import org.gradle.model.internal.type.ModelType;
 import org.gradle.model.internal.type.ModelTypes;
 
@@ -31,11 +30,11 @@ public class ModelSetNodeInitializerExtractionStrategy extends CollectionNodeIni
     };
 
     @Override
-    protected <T, E> NodeInitializer extractNodeInitializer(ModelCollectionSchema<T, E> schema, ModelSchemaStore schemaStore, NodeInitializerRegistry nodeInitializerRegistry) {
+    protected <T, E> NodeInitializer extractNodeInitializer(ModelCollectionSchema<T, E> schema, NodeInitializerRegistry nodeInitializerRegistry) {
         if (MODEL_SET_MODEL_TYPE.isAssignableFrom(schema.getType())) {
             ModelProjection projection = TypedModelProjection.of(
                 ModelTypes.modelSet(schema.getElementType()),
-                new ModelSetModelViewFactory<E>(schema.getElementType(), schemaStore, nodeInitializerRegistry)
+                new ModelSetModelViewFactory<E>(schema.getElementType(), nodeInitializerRegistry)
             );
             return new ProjectionOnlyNodeInitializer(projection);
         }
@@ -44,12 +43,10 @@ public class ModelSetNodeInitializerExtractionStrategy extends CollectionNodeIni
 
     private static class ModelSetModelViewFactory<T> implements ModelViewFactory<ModelSet<T>> {
         private final ModelType<T> elementType;
-        private final ModelSchemaStore store;
         private final NodeInitializerRegistry nodeInitializerRegistry;
 
-        public ModelSetModelViewFactory(ModelType<T> elementType, ModelSchemaStore store, NodeInitializerRegistry nodeInitializerRegistry) {
+        public ModelSetModelViewFactory(ModelType<T> elementType, NodeInitializerRegistry nodeInitializerRegistry) {
             this.elementType = elementType;
-            this.store = store;
             this.nodeInitializerRegistry = nodeInitializerRegistry;
         }
 
@@ -57,7 +54,7 @@ public class ModelSetNodeInitializerExtractionStrategy extends CollectionNodeIni
         public ModelView<ModelSet<T>> toView(MutableModelNode modelNode, ModelRuleDescriptor ruleDescriptor, boolean writable) {
             ModelType<ModelSet<T>> setType = ModelTypes.modelSet(elementType);
             DefaultModelViewState state = new DefaultModelViewState(setType, ruleDescriptor, writable, !writable);
-            final ManagedChildNodeCreatorStrategy<T> childCreator = new ManagedChildNodeCreatorStrategy<T>(store, nodeInitializerRegistry);
+            final ManagedChildNodeCreatorStrategy<T> childCreator = new ManagedChildNodeCreatorStrategy<T>(nodeInitializerRegistry);
             NodeBackedModelSet<T> set = new NodeBackedModelSet<T>(setType.toString() + " '" + modelNode.getPath() + "'", elementType, ruleDescriptor, modelNode, state, childCreator);
             return InstanceModelView.of(modelNode.getPath(), setType, set, state.closer());
         }

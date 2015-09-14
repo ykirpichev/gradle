@@ -16,9 +16,13 @@
 
 package org.gradle.model.internal.core;
 
+import org.gradle.model.internal.manage.schema.ManagedImplModelSchema;
 import org.gradle.model.internal.manage.schema.ModelSchema;
 import org.gradle.model.internal.manage.schema.ModelSchemaStore;
+import org.gradle.model.internal.type.ModelType;
 
 public interface NodeInitializerRegistry {
-    <T> NodeInitializer getNodeInitializer(ModelSchema<T> schema, ModelSchemaStore schemaStore);
+    <T> NodeInitializer getNodeInitializer(ModelSchema<T> schema);
+
+    <T> NodeInitializer getNodeInitializer(ModelType<T> type);
 }

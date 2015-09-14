@@ -20,16 +20,15 @@ import org.gradle.model.internal.core.NodeInitializer;
 import org.gradle.model.internal.core.NodeInitializerRegistry;
 import org.gradle.model.internal.manage.schema.ModelCollectionSchema;
 import org.gradle.model.internal.manage.schema.ModelSchema;
-import org.gradle.model.internal.manage.schema.ModelSchemaStore;
 
 public abstract class CollectionNodeInitializerExtractionSupport implements NodeInitializerExtractionStrategy {
     @Override
-    public <T> NodeInitializer extractNodeInitializer(ModelSchema<T> schema, ModelSchemaStore schemaStore, NodeInitializerRegistry nodeInitializerRegistry) {
+    public <T> NodeInitializer extractNodeInitializer(ModelSchema<T> schema, NodeInitializerRegistry nodeInitializerRegistry) {
         if (!(schema instanceof ModelCollectionSchema)) {
             return null;
         }
-        return extractNodeInitializer((ModelCollectionSchema<T, ?>) schema, schemaStore, nodeInitializerRegistry);
+        return extractNodeInitializer((ModelCollectionSchema<T, ?>) schema, nodeInitializerRegistry);
     }
 
-    protected abstract <T, E> NodeInitializer extractNodeInitializer(ModelCollectionSchema<T, E> schema, ModelSchemaStore schemaStore, NodeInitializerRegistry nodeInitializerRegistry);
+    protected abstract <T, E> NodeInitializer extractNodeInitializer(ModelCollectionSchema<T, E> schema, NodeInitializerRegistry nodeInitializerRegistry);
 }
