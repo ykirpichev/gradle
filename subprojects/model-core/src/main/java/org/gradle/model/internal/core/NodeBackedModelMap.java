@@ -59,6 +59,18 @@ public class NodeBackedModelMap<T> implements ModelMap<T>, ManagedInstance {
         this(derivedDescription(modelNode, type), type, sourceDescriptor, modelNode, eager, viewState, childStrategy);
     }
 
+    public static <T> ChildNodeInitializerStrategy<T> createUsingRegistry(final ModelType<T> baseItemModelType, final NodeInitializerRegistry nodeInitializerRegistry) {
+        return new ChildNodeInitializerStrategy<T>() {
+            @Override
+            public <S extends T> NodeInitializer initializer(ModelType<S> type) {
+                if (baseItemModelType.asSubclass(type) == null) {
+                    throw new IllegalArgumentException(String.format("%s is not a subtype of %s", type, baseItemModelType));
+                }
+                return nodeInitializerRegistry.getNodeInitializer(type);
+            }
+        };
+    }
+
     public static <T> ChildNodeInitializerStrategy<T> createUsingParentNode(final ModelType<T> baseItemModelType) {
         return createUsingParentNode(new Transformer<NamedEntityInstantiator<T>, MutableModelNode>() {
             @Override

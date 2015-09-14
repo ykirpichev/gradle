@@ -59,11 +59,13 @@ public class LanguageBasePlugin implements Plugin<Project> {
 
     private final Instantiator instantiator;
     private final ModelRegistry modelRegistry;
+    private final NodeInitializerRegistry nodeInitializerRegistry;
 
     @Inject
-    public LanguageBasePlugin(Instantiator instantiator, ModelRegistry modelRegistry) {
+    public LanguageBasePlugin(Instantiator instantiator, ModelRegistry modelRegistry, NodeInitializerRegistry nodeInitializerRegistry) {
         this.instantiator = instantiator;
         this.modelRegistry = modelRegistry;
+        this.nodeInitializerRegistry = nodeInitializerRegistry;
     }
 
     public void apply(final Project target) {
@@ -71,10 +73,10 @@ public class LanguageBasePlugin implements Plugin<Project> {
         target.getExtensions().create("sources", DefaultProjectSourceSet.class);
 
         DefaultBinaryContainer binaries = target.getExtensions().create("binaries", DefaultBinaryContainer.class, instantiator);
-        applyRules(modelRegistry, binaries);
+        applyRules(modelRegistry, nodeInitializerRegistry, binaries);
     }
 
-    private static void applyRules(ModelRegistry modelRegistry, DefaultBinaryContainer binaries) {
+    private static void applyRules(ModelRegistry modelRegistry, NodeInitializerRegistry nodeInitializerRegistry, DefaultBinaryContainer binaries) {
         final String descriptor = LanguageBasePlugin.class.getSimpleName() + ".apply()";
         final ModelRuleDescriptor ruleDescriptor = new SimpleModelRuleDescriptor(descriptor);
         ModelPath binariesPath = ModelPath.path("binaries");
@@ -90,7 +92,9 @@ public class LanguageBasePlugin implements Plugin<Project> {
             )
                 .descriptor(descriptor)
                 .ephemeral(true)
-                .withProjection(PolymorphicModelMapProjection.of(binarySpecModelType, NodeBackedModelMap.createUsingParentNode(binarySpecModelType)))
+                .withProjection(PolymorphicModelMapProjection.of(
+                    binarySpecModelType,
+                    NodeBackedModelMap.createUsingRegistry(binarySpecModelType, nodeInitializerRegistry)))
                 .withProjection(UnmanagedModelProjection.of(DefaultBinaryContainer.class))
                 .build()
         );
