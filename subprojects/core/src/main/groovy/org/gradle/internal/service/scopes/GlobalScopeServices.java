@@ -243,8 +243,8 @@ public class GlobalScopeServices {
         return new DefaultNodeInitializerRegistry(instanceFactoryRegistry, strategies);
     }
 
-    protected ModelSchemaStore createModelSchemaStore(ModelSchemaExtractor modelSchemaExtractor, NodeInitializerRegistry nodeInitializerRegistry) {
-        return new DefaultModelSchemaStore(modelSchemaExtractor, Collections.singleton(DynamicObjectAwareTypeUtils.MODEL_TYPE_EXTRACTOR), nodeInitializerRegistry);
+    protected ModelSchemaStore createModelSchemaStore(ModelSchemaExtractor modelSchemaExtractor) {
+        return new DefaultModelSchemaStore(modelSchemaExtractor, Collections.singleton(DynamicObjectAwareTypeUtils.MODEL_TYPE_EXTRACTOR));
     }
 
     protected ModelRuleSourceDetector createModelRuleSourceDetector() {

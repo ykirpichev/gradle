@@ -17,7 +17,6 @@
 package org.gradle.model.internal.manage.schema.extract;
 
 import org.gradle.api.Nullable;
-import org.gradle.model.internal.core.NodeInitializerRegistry;
 import org.gradle.model.internal.manage.schema.ModelSchemaStore;
 import org.gradle.model.internal.manage.schema.cache.ModelSchemaCache;
 import org.gradle.model.internal.type.ModelType;
@@ -32,7 +31,7 @@ public abstract class SetStrategy extends CollectionStrategy {
 
     @Nullable
     @Override
-    public <T> ModelSchemaExtractionResult<T> extractSchema(ModelSchemaExtractionContext<T> extractionContext, ModelSchemaStore store, ModelSchemaCache cache, NodeInitializerRegistry nodeInitializerRegistry) {
+    public <T> ModelSchemaExtractionResult<T> extractSchema(ModelSchemaExtractionContext<T> extractionContext, ModelSchemaStore store, ModelSchemaCache cache) {
         ModelType<T> type = extractionContext.getType();
         if (modelType.isAssignableFrom(type)) {
            validateType(modelType, extractionContext, type);

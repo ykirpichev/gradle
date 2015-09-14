@@ -23,7 +23,6 @@ import com.google.common.collect.*;
 import org.apache.commons.lang.StringUtils;
 import org.gradle.api.Action;
 import org.gradle.api.Nullable;
-import org.gradle.model.internal.core.NodeInitializerRegistry;
 import org.gradle.model.internal.manage.schema.ModelProperty;
 import org.gradle.model.internal.manage.schema.ModelSchema;
 import org.gradle.model.internal.manage.schema.ModelSchemaStore;
@@ -49,7 +48,7 @@ public abstract class StructSchemaExtractionStrategySupport implements ModelSche
 
     protected abstract boolean isTarget(ModelType<?> type);
 
-    public <R> ModelSchemaExtractionResult<R> extractSchema(final ModelSchemaExtractionContext<R> extractionContext, ModelSchemaStore store, final ModelSchemaCache cache, NodeInitializerRegistry nodeInitializerRegistry) {
+    public <R> ModelSchemaExtractionResult<R> extractSchema(final ModelSchemaExtractionContext<R> extractionContext, ModelSchemaStore store, final ModelSchemaCache cache) {
         ModelType<R> type = extractionContext.getType();
         if (!isTarget(type)) {
             return null;
@@ -60,7 +59,7 @@ public abstract class StructSchemaExtractionStrategySupport implements ModelSche
         List<ModelPropertyExtractionResult<?>> propertyExtractionResults = extractPropertySchemas(extractionContext, ModelSchemaUtils.getCandidateMethods(type.getRawClass()));
         List<ModelSchemaAspect> aspects = aspectExtractor.extract(extractionContext, propertyExtractionResults);
 
-        ModelSchema<R> schema = createSchema(extractionContext, propertyExtractionResults, aspects, store, nodeInitializerRegistry);
+        ModelSchema<R> schema = createSchema(extractionContext, propertyExtractionResults, aspects, store);
         Iterable<ModelSchemaExtractionContext<?>> propertyDependencies = Iterables.transform(propertyExtractionResults, new Function<ModelPropertyExtractionResult<?>, ModelSchemaExtractionContext<?>>() {
             public ModelSchemaExtractionContext<?> apply(ModelPropertyExtractionResult<?> propertyResult) {
                 return toPropertyExtractionContext(extractionContext, propertyResult, cache);
@@ -214,7 +213,7 @@ public abstract class StructSchemaExtractionStrategySupport implements ModelSche
 
     protected abstract ModelProperty.StateManagementType determineStateManagementType(ModelSchemaExtractionContext<?> extractionContext, PropertyAccessorExtractionContext getterContext);
 
-    protected abstract <R> ModelSchema<R> createSchema(ModelSchemaExtractionContext<R> extractionContext, Iterable<ModelPropertyExtractionResult<?>> propertyResults, Iterable<ModelSchemaAspect> aspects, ModelSchemaStore store, NodeInitializerRegistry nodeInitializerRegistry);
+    protected abstract <R> ModelSchema<R> createSchema(ModelSchemaExtractionContext<R> extractionContext, Iterable<ModelPropertyExtractionResult<?>> propertyResults, Iterable<ModelSchemaAspect> aspects, ModelSchemaStore store);
 
     protected abstract <P> Action<ModelSchemaExtractionContext<P>> createPropertyValidator(ModelPropertyExtractionResult<P> propertyResult, ModelSchemaCache modelSchemaCache);
 

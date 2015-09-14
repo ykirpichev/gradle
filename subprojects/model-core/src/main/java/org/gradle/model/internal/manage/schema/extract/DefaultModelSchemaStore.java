@@ -19,8 +19,6 @@ package org.gradle.model.internal.manage.schema.extract;
 import com.google.common.collect.ImmutableList;
 import net.jcip.annotations.NotThreadSafe;
 import org.gradle.internal.Cast;
-import org.gradle.model.internal.manage.schema.DefaultNodeInitializerRegistry;
-import org.gradle.model.internal.core.NodeInitializerRegistry;
 import org.gradle.model.internal.manage.schema.ModelSchema;
 import org.gradle.model.internal.manage.schema.ModelSchemaStore;
 import org.gradle.model.internal.manage.schema.cache.ModelSchemaCache;
@@ -37,7 +35,6 @@ public class DefaultModelSchemaStore implements ModelSchemaStore {
 
     final ModelSchemaCache cache = new ModelSchemaCache();
     final ModelSchemaExtractor schemaExtractor;
-    private final NodeInitializerRegistry nodeInitializerRegistry;
     private final List<ModelTypeExtractor> typeExtractors;
 
     public static DefaultModelSchemaStore getInstance() {
@@ -45,12 +42,11 @@ public class DefaultModelSchemaStore implements ModelSchemaStore {
     }
 
     public DefaultModelSchemaStore(ModelSchemaExtractor schemaExtractor) {
-        this(schemaExtractor, Collections.<ModelTypeExtractor>emptyList(), new DefaultNodeInitializerRegistry());
+        this(schemaExtractor, Collections.<ModelTypeExtractor>emptyList());
     }
 
-    public DefaultModelSchemaStore(ModelSchemaExtractor schemaExtractor, Collection<ModelTypeExtractor> typeExtractor, NodeInitializerRegistry nodeInitializerRegistry) {
+    public DefaultModelSchemaStore(ModelSchemaExtractor schemaExtractor, Collection<ModelTypeExtractor> typeExtractor) {
         this.schemaExtractor = schemaExtractor;
-        this.nodeInitializerRegistry = nodeInitializerRegistry;
         this.typeExtractors = ImmutableList.copyOf(typeExtractor);
     }
 
@@ -59,7 +55,7 @@ public class DefaultModelSchemaStore implements ModelSchemaStore {
         for (ModelTypeExtractor typeExtractor : typeExtractors) {
             schemaType = Cast.uncheckedCast(typeExtractor.extractFromType(schemaType));
         }
-        return schemaExtractor.extract(schemaType, this, cache, nodeInitializerRegistry);
+        return schemaExtractor.extract(schemaType, this, cache);
     }
 
     @Override
