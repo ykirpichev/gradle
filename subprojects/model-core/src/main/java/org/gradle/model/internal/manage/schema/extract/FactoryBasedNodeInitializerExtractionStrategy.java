@@ -17,7 +17,7 @@
 package org.gradle.model.internal.manage.schema.extract;
 
 import org.gradle.model.internal.core.*;
-import org.gradle.model.internal.manage.schema.ManagedImplModelSchema;
+import org.gradle.model.internal.manage.schema.ModelSchema;
 import org.gradle.model.internal.manage.schema.ModelSchemaStore;
 import org.gradle.model.internal.type.ModelType;
 
@@ -29,7 +29,7 @@ public class FactoryBasedNodeInitializerExtractionStrategy implements NodeInitia
     }
 
     @Override
-    public <T> NodeInitializer extractNodeInitializer(ManagedImplModelSchema<T> schema, ModelSchemaStore schemaStore, NodeInitializerRegistry nodeInitializerRegistry) {
+    public <T> NodeInitializer extractNodeInitializer(ModelSchema<T> schema, ModelSchemaStore schemaStore, NodeInitializerRegistry nodeInitializerRegistry) {
         ModelType<T> type = schema.getType();
         ModelReference<InstanceFactory<? super T, String>> factoryReference = instanceFactoryRegistry.getFactory(type);
         if (factoryReference == null) {

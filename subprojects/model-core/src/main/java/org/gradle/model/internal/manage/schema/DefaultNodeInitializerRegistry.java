@@ -46,7 +46,7 @@ public class DefaultNodeInitializerRegistry implements NodeInitializerRegistry {
     }
 
     @Override
-    public <T> NodeInitializer getNodeInitializer(ManagedImplModelSchema<T> schema, ModelSchemaStore schemaStore) {
+    public <T> NodeInitializer getNodeInitializer(ModelSchema<T> schema, ModelSchemaStore schemaStore) {
         for (NodeInitializerExtractionStrategy extractor : strategies) {
             NodeInitializer nodeInitializer = extractor.extractNodeInitializer(schema, schemaStore, this);
             if (nodeInitializer != null) {
