@@ -60,12 +60,14 @@ import static org.apache.commons.lang.StringUtils.capitalize;
 public class ComponentModelBasePlugin implements Plugin<ProjectInternal> {
     private final ModelRegistry modelRegistry;
     private final ModelSchemaStore schemaStore;
+    private final NodeInitializerRegistry nodeInitializerRegistry;
     private final InstanceFactoryRegistry instanceFactoryRegistry;
 
     @Inject
-    public ComponentModelBasePlugin(ModelRegistry modelRegistry, ModelSchemaStore schemaStore, InstanceFactoryRegistry instanceFactoryRegistry) {
+    public ComponentModelBasePlugin(ModelRegistry modelRegistry, ModelSchemaStore schemaStore, NodeInitializerRegistry nodeInitializerRegistry, InstanceFactoryRegistry instanceFactoryRegistry) {
         this.modelRegistry = modelRegistry;
         this.schemaStore = schemaStore;
+        this.nodeInitializerRegistry = nodeInitializerRegistry;
         this.instanceFactoryRegistry = instanceFactoryRegistry;
     }
 
@@ -73,18 +75,6 @@ public class ComponentModelBasePlugin implements Plugin<ProjectInternal> {
         project.getPluginManager().apply(LanguageBasePlugin.class);
 
         SimpleModelRuleDescriptor descriptor = new SimpleModelRuleDescriptor(ComponentModelBasePlugin.class.getSimpleName() + ".apply()");
-
-        SpecializedMapSchema<ComponentSpecContainer> schema = (SpecializedMapSchema<ComponentSpecContainer>) schemaStore.getSchema(ModelType.of(ComponentSpecContainer.class));
-        ModelPath components = ModelPath.path("components");
-        ModelCreator componentsCreator = ModelMapCreators.specialized(
-            components,
-            ComponentSpec.class,
-            ComponentSpecContainer.class,
-            schema.getImplementationType().asSubclass(ComponentSpecContainer.class),
-            ModelReference.of(ComponentSpecFactory.class),
-            descriptor
-        );
-        modelRegistry.create(componentsCreator);
 
         modelRegistry.createOrReplace(ModelCreators.unmanagedInstance(ModelReference.of(ModelPath.path("__modelSchemaStore"), ModelType.of(ModelSchemaStore.class)), Factories.constant(schemaStore))
             .descriptor(descriptor)
@@ -97,6 +87,18 @@ public class ComponentModelBasePlugin implements Plugin<ProjectInternal> {
             .ephemeral(true)
             .hidden(true)
             .build());
+
+        SpecializedMapSchema<ComponentSpecContainer> schema = (SpecializedMapSchema<ComponentSpecContainer>) schemaStore.getSchema(ModelType.of(ComponentSpecContainer.class));
+        ModelPath components = ModelPath.path("components");
+        ModelCreator componentsCreator = ModelMapCreators.specialized(
+            components,
+            ComponentSpec.class,
+            ComponentSpecContainer.class,
+            schema.getImplementationType().asSubclass(ComponentSpecContainer.class),
+            nodeInitializerRegistry,
+            descriptor
+        );
+        modelRegistry.create(componentsCreator);
 
         modelRegistry.getRoot().applyToAllLinksTransitive(ModelType.of(ComponentSpec.class), ComponentRules.class);
         modelRegistry.getRoot().applyToAllLinksTransitive(ModelType.of(ComponentSpec.class), ComponentBinaryRules.class);
@@ -200,6 +202,11 @@ public class ComponentModelBasePlugin implements Plugin<ProjectInternal> {
             for (Class<? extends ComponentSpec> type : componentSpecFactory.getSupportedTypes()) {
                 instanceFactoryRegistry.register(ModelType.of(type), ModelReference.of(ComponentSpecFactory.class));
             }
+        }
+
+        @Model
+        NodeInitializerRegistry createNodeInitializerRegistry(ServiceRegistry serviceRegistry, InstanceFactoryRegistry instanceFactoryRegistry) {
+            return serviceRegistry.get(NodeInitializerRegistry.class);
         }
 
         @Defaults
