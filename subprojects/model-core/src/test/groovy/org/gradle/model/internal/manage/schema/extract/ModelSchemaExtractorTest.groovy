@@ -945,7 +945,7 @@ interface Managed${typeName} {
     def "can register custom strategy"() {
         when:
         def strategy = Mock(ModelSchemaExtractionStrategy) {
-            extractSchema(_, _, _) >> { ModelSchemaExtractionContext extractionContext, ModelSchemaStore store, ModelSchemaCache cache ->
+            extractSchema(_, _) >> { ModelSchemaExtractionContext extractionContext, ModelSchemaCache cache ->
                 if (extractionContext.type.rawClass == CustomThing) {
                     return new ModelSchemaExtractionResult(new ModelValueSchema<?>(extractionContext.type))
                 } else {

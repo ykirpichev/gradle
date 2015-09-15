@@ -55,7 +55,7 @@ public class DefaultModelSchemaStore implements ModelSchemaStore {
         for (ModelTypeExtractor typeExtractor : typeExtractors) {
             schemaType = Cast.uncheckedCast(typeExtractor.extractFromType(schemaType));
         }
-        return schemaExtractor.extract(schemaType, this, cache);
+        return schemaExtractor.extract(schemaType, cache);
     }
 
     @Override

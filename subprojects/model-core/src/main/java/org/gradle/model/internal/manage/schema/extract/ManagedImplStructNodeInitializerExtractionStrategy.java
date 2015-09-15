@@ -20,14 +20,18 @@ import org.gradle.model.internal.core.NodeInitializer;
 import org.gradle.model.internal.core.NodeInitializerRegistry;
 import org.gradle.model.internal.inspect.ManagedModelInitializer;
 import org.gradle.model.internal.manage.schema.ModelManagedImplStructSchema;
+import org.gradle.model.internal.manage.schema.ModelSchemaStore;
 
 public class ManagedImplStructNodeInitializerExtractionStrategy extends ManagedImplStructNodeInitializerExtractionSupport {
-    public ManagedImplStructNodeInitializerExtractionStrategy() {
+    private final ModelSchemaStore schemaStore;
+
+    public ManagedImplStructNodeInitializerExtractionStrategy(ModelSchemaStore schemaStore) {
         super(null);
+        this.schemaStore = schemaStore;
     }
 
     @Override
     protected <T> NodeInitializer extractNodeInitializer(ModelManagedImplStructSchema<T> schema, NodeInitializerRegistry nodeInitializerRegistry) {
-        return new ManagedModelInitializer<T>(schema, nodeInitializerRegistry);
+        return new ManagedModelInitializer<T>(schema, schemaStore, nodeInitializerRegistry);
     }
 }

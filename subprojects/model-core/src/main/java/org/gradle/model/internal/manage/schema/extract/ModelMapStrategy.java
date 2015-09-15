@@ -21,7 +21,6 @@ import net.jcip.annotations.ThreadSafe;
 import org.gradle.internal.Actions;
 import org.gradle.model.ModelMap;
 import org.gradle.model.internal.manage.schema.ModelCollectionSchema;
-import org.gradle.model.internal.manage.schema.ModelSchemaStore;
 import org.gradle.model.internal.manage.schema.cache.ModelSchemaCache;
 import org.gradle.model.internal.type.ModelType;
 
@@ -35,7 +34,7 @@ public class ModelMapStrategy implements ModelSchemaExtractionStrategy {
 
     // TODO extract common stuff from this and ModelSet and reuse
 
-    public <T> ModelSchemaExtractionResult<T> extractSchema(ModelSchemaExtractionContext<T> extractionContext, ModelSchemaStore store, final ModelSchemaCache cache) {
+    public <T> ModelSchemaExtractionResult<T> extractSchema(ModelSchemaExtractionContext<T> extractionContext, final ModelSchemaCache cache) {
         ModelType<T> type = extractionContext.getType();
         if (MODEL_MAP_MODEL_TYPE.isAssignableFrom(type)) {
             if (!type.getRawClass().equals(ModelMap.class)) {

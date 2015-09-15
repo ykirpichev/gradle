@@ -36,12 +36,14 @@ public class ManagedModelProjection<M> extends TypeCompatibilityModelProjectionS
 
     private final ModelManagedImplStructSchema<M> schema;
     private final ManagedProxyFactory proxyFactory;
+    private final ModelSchemaStore schemaStore;
     private final NodeInitializerRegistry nodeInitializerRegistry;
 
-    public ManagedModelProjection(ModelManagedImplStructSchema<M> schema, ManagedProxyFactory proxyFactory, NodeInitializerRegistry nodeInitializerRegistry) {
+    public ManagedModelProjection(ModelManagedImplStructSchema<M> schema, ManagedProxyFactory proxyFactory, ModelSchemaStore schemaStore, NodeInitializerRegistry nodeInitializerRegistry) {
         super(schema.getType(), true, true);
         this.schema = schema;
         this.proxyFactory = proxyFactory;
+        this.schemaStore = schemaStore;
         this.nodeInitializerRegistry = nodeInitializerRegistry;
     }
 
@@ -100,7 +102,7 @@ public class ManagedModelProjection<M> extends TypeCompatibilityModelProjectionS
                     propertyNode.ensureUsable();
 
                     ModelView<? extends T> modelView;
-                    ModelSchema<T> propertySchema = schema.getPropertySchema(property);
+                    ModelSchema<T> propertySchema = schemaStore.getSchema(propertyType);
                     if (property.isWritable() && propertySchema instanceof ScalarCollectionSchema) {
                         Collection<?> instance = ScalarCollectionSchema.get(propertyNode);
                         if (instance == null) {
@@ -134,8 +136,8 @@ public class ManagedModelProjection<M> extends TypeCompatibilityModelProjectionS
                     MutableModelNode propertyNode = modelNode.getLink(name);
                     propertyNode.ensureUsable();
 
-                    ModelSchema<T> propertySchema = schema.getPropertySchema(property);
                     ModelType<T> propertyType = property.getType();
+                    ModelSchema<T> propertySchema = schemaStore.getSchema(propertyType);
                     if (propertySchema instanceof ManagedImplModelSchema) {
                         if (value == null) {
                             if (propertySchema instanceof ScalarCollectionSchema) {

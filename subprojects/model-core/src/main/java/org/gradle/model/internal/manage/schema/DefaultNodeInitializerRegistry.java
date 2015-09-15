@@ -44,7 +44,7 @@ public class DefaultNodeInitializerRegistry implements NodeInitializerRegistry {
             .add(new ManagedSetNodeInitializerExtractionStrategy())
             .add(new ModelMapNodeInitializerExtractionStrategy())
             .add(new ScalarCollectionNodeInitializerExtractionStrategy())
-            .add(new ManagedImplStructNodeInitializerExtractionStrategy())
+            .add(new ManagedImplStructNodeInitializerExtractionStrategy(schemaStore))
             .build();
     }
 

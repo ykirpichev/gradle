@@ -39,8 +39,8 @@ public class PlatformJvmServices implements PluginServiceRegistry {
     public void registerGlobalServices(ServiceRegistration registration) {
         registration.add(JarBinaryRenderer.class);
         registration.add(JarBinarySpecSpecializationSchemaExtractionStrategy.class);
-        registration.add(JarBinarySpecSpecializationNodeInitializerExtractionStrategy.class);
         registration.add(VariantDimensionSelectorFactory.class, DefaultVariantDimensionSelectorFactory.of(JavaPlatform.class, new DefaultJavaPlatformVariantDimensionSelector()));
+        registration.addProvider(new GlobalScopeServices());
     }
 
     public void registerBuildSessionServices(ServiceRegistration registration) {
@@ -86,4 +86,9 @@ public class PlatformJvmServices implements PluginServiceRegistry {
         }
     }
 
+    private static class GlobalScopeServices {
+        JarBinarySpecSpecializationNodeInitializerExtractionStrategy createJarBinarySpecSpecializationNodeInitializerExtractionStrategy(ModelSchemaStore schemaStore) {
+            return new JarBinarySpecSpecializationNodeInitializerExtractionStrategy(schemaStore);
+        }
+    }
 }

@@ -16,14 +16,13 @@
 
 package org.gradle.model.internal.manage.schema.extract;
 
-import org.gradle.model.internal.manage.schema.ModelSchemaStore;
 import org.gradle.model.internal.manage.schema.ModelValueSchema;
 import org.gradle.model.internal.manage.schema.cache.ModelSchemaCache;
 import org.gradle.model.internal.type.ModelType;
 
 public class PrimitiveStrategy implements ModelSchemaExtractionStrategy {
 
-    public <T> ModelSchemaExtractionResult<T> extractSchema(ModelSchemaExtractionContext<T> extractionContext, ModelSchemaStore store, ModelSchemaCache cache) {
+    public <T> ModelSchemaExtractionResult<T> extractSchema(ModelSchemaExtractionContext<T> extractionContext, ModelSchemaCache cache) {
         ModelType<T> type = extractionContext.getType();
         if (type.getRawClass().isPrimitive()) {
             return new ModelSchemaExtractionResult<T>(new ModelValueSchema<T>(type));

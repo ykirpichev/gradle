@@ -115,7 +115,7 @@ public abstract class ManagedImplStructSchemaExtractionStrategySupport extends S
     }
 
     @Override
-    protected <R> ModelManagedImplStructSchema<R> createSchema(ModelSchemaExtractionContext<R> extractionContext, Iterable<ModelPropertyExtractionResult<?>> propertyResults, Iterable<ModelSchemaAspect> aspects, final ModelSchemaStore store) {
+    protected <R> ModelManagedImplStructSchema<R> createSchema(ModelSchemaExtractionContext<R> extractionContext, Iterable<ModelPropertyExtractionResult<?>> propertyResults, Iterable<ModelSchemaAspect> aspects) {
         ModelType<R> type = extractionContext.getType();
         Class<? extends R> implClass = classGenerator.generate(type, delegateType, propertyResults);
         Iterable<ModelProperty<?>> properties = Iterables.transform(propertyResults, new Function<ModelPropertyExtractionResult<?>, ModelProperty<?>>() {
@@ -124,7 +124,7 @@ public abstract class ManagedImplStructSchemaExtractionStrategySupport extends S
                 return propertyResult.getProperty();
             }
         });
-        return new ModelManagedImplStructSchema<R>(store, type, properties, aspects, implClass, delegateType);
+        return new ModelManagedImplStructSchema<R>(type, properties, aspects, implClass, delegateType);
     }
 
     @Override

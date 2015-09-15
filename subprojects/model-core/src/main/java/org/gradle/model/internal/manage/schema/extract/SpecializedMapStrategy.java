@@ -19,7 +19,6 @@ package org.gradle.model.internal.manage.schema.extract;
 import org.gradle.api.Nullable;
 import org.gradle.model.ModelMap;
 import org.gradle.model.internal.core.ModelMapGroovyDecorator;
-import org.gradle.model.internal.manage.schema.ModelSchemaStore;
 import org.gradle.model.internal.manage.schema.SpecializedMapSchema;
 import org.gradle.model.internal.manage.schema.cache.ModelSchemaCache;
 import org.gradle.model.internal.type.ModelType;
@@ -35,7 +34,7 @@ public class SpecializedMapStrategy implements ModelSchemaExtractionStrategy {
 
     @Nullable
     @Override
-    public <T> ModelSchemaExtractionResult<T> extractSchema(ModelSchemaExtractionContext<T> extractionContext, ModelSchemaStore store, ModelSchemaCache cache) {
+    public <T> ModelSchemaExtractionResult<T> extractSchema(ModelSchemaExtractionContext<T> extractionContext, ModelSchemaCache cache) {
         Type type = extractionContext.getType().getType();
         if (!(type instanceof Class)) {
             return null;
