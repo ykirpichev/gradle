@@ -1225,7 +1225,7 @@ foo
 
         then:
         def ex = thrown IllegalStateException
-        ex.message == "Cannot add projector 'internal projection' for model element 'foo' as this element is already at state ProjectionsDefined."
+        ex.message == "Cannot add project rule internal projection for model element 'foo' at state Known as this element is already at state ProjectionsDefined."
     }
 
     static class Bean {

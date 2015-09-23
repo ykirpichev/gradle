@@ -16,9 +16,10 @@
 
 package org.gradle.model.internal.core;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.jcip.annotations.ThreadSafe;
-import org.gradle.internal.BiAction;
+import org.gradle.api.Action;
 import org.gradle.model.internal.core.rule.describe.ModelRuleDescriptor;
 
 import java.util.List;
@@ -28,29 +29,46 @@ public class ProjectionBackedModelCreator implements ModelCreator {
     private final ModelPath path;
     private final ModelRuleDescriptor descriptor;
     private final boolean ephemeral;
-    private final boolean hidden;
     private final ModelProjection projection;
     private final List<ModelProjection> projections;
-    private final List<? extends ModelReference<?>> inputs;
-    private final BiAction<? super MutableModelNode, ? super List<ModelView<?>>> initializer;
+    private final List<? extends ModelInitializer> registrationActions;
+    private final List<? extends ModelInitializer> creatorActions;
 
     public ProjectionBackedModelCreator(
         ModelPath path,
         ModelRuleDescriptor descriptor,
         boolean ephemeral,
-        boolean hidden,
-        List<? extends ModelReference<?>> inputs,
-        List<? extends ModelProjection> projections,
-        BiAction<? super MutableModelNode, ? super List<ModelView<?>>> initializer
+        final boolean hidden,
+        List<ModelProjection> projections,
+        List<? extends ModelInitializer> registrationActions,
+        List<? extends ModelInitializer> creatorActions
     ) {
         this.path = path;
         this.descriptor = descriptor;
         this.ephemeral = ephemeral;
-        this.hidden = hidden;
+        this.registrationActions = ImmutableList.<ModelInitializer>builder()
+            .addAll(registrationActions)
+            .add(NodeInitializerActions.from(path, descriptor, new Action<MutableModelNode>() {
+                @Override
+                public void execute(MutableModelNode node) {
+                    node.setHidden(hidden);
+                }
+            }))
+            .build();
+        this.creatorActions = ImmutableList.copyOf(creatorActions);
+
         this.projections = Lists.newArrayList(projections);
         this.projection = new ChainingModelProjection(this.projections);
-        this.inputs = inputs;
-        this.initializer = initializer;
+    }
+
+    @Override
+    public List<? extends ModelInitializer> getRegistrationActions() {
+        return registrationActions;
+    }
+
+    @Override
+    public List<? extends ModelInitializer> getCreatorActions() {
+        return creatorActions;
     }
 
     public ModelPath getPath() {
@@ -70,18 +88,9 @@ public class ProjectionBackedModelCreator implements ModelCreator {
         return projection;
     }
 
-    public void create(MutableModelNode node, List<ModelView<?>> inputs) {
-        node.setHidden(hidden);
-        initializer.execute(node, inputs);
-    }
-
     @Override
     public boolean isEphemeral() {
         return ephemeral;
-    }
-
-    public List<? extends ModelReference<?>> getInputs() {
-        return inputs;
     }
 
     public ModelRuleDescriptor getDescriptor() {

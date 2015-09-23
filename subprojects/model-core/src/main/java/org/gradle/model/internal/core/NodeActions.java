@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 the original author or authors.
+ * Copyright 2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,26 +16,23 @@
 
 package org.gradle.model.internal.core;
 
-import org.gradle.model.internal.core.rule.describe.ModelRuleDescriptor;
+import org.gradle.api.Action;
 
+import java.util.Collections;
 import java.util.List;
 
-public interface ModelCreator extends ModelRule {
-    ModelRuleDescriptor getDescriptor();
+public class NodeActions {
+    public static NodeAction from(final Action<? super MutableModelNode> action) {
+        return new NodeAction() {
+            @Override
+            public List<? extends ModelReference<?>> getInputs() {
+                return Collections.emptyList();
+            }
 
-    ModelPath getPath();
-
-    ModelPromise getPromise();
-
-    ModelAdapter getAdapter();
-
-    ModelProjection getProjection();
-
-    List<? extends ModelInitializer> getRegistrationActions();
-
-    List<? extends ModelInitializer> getCreatorActions();
-
-    boolean isEphemeral();
-
-    void addProjection(ModelProjection projection);
+            @Override
+            public void execute(MutableModelNode modelNode, List<ModelView<?>> inputs) {
+                action.execute(modelNode);
+            }
+        };
+    }
 }

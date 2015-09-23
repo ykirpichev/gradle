@@ -23,6 +23,9 @@ import org.gradle.model.internal.core.*;
 import org.gradle.model.internal.core.rule.describe.ModelRuleDescriptor;
 import org.gradle.model.internal.type.ModelType;
 
+import java.util.Collections;
+import java.util.List;
+
 public class ModelMapCreators {
 
     public static <T, C extends ModelMap<T>> ModelCreator specialized(ModelPath path,
@@ -38,7 +41,16 @@ public class ModelMapCreators {
             .descriptor(descriptor)
             .withProjection(new SpecializedModelMapProjection<C, T>(containerType, modelType, viewClass, childFactory))
             .withProjection(PolymorphicModelMapProjection.of(modelType, childFactory))
-            .inputs(ModelReference.of(NodeInitializerRegistry.class))
+            .withInitializer(new NodeAction() {
+                @Override
+                public List<? extends ModelReference<?>> getInputs() {
+                    return Collections.singletonList(ModelReference.of(NodeInitializerRegistry.class));
+                }
+
+                @Override
+                public void execute(MutableModelNode modelNode, List<ModelView<?>> inputs) {
+                }
+            })
             .build();
     }
 }

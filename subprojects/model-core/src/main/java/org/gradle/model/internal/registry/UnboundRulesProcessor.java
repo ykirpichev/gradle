@@ -44,7 +44,7 @@ class UnboundRulesProcessor {
         for (RuleBinder binder : binders) {
             UnboundRule.Builder builder = UnboundRule.descriptor(binder.getDescriptor().toString());
 
-            if (binder.getSubjectBinding() != null) {
+            if (!(binder instanceof InitializerRuleBinder) && binder.getSubjectBinding() != null) {
                 ModelBinding binding = binder.getSubjectBinding();
                 UnboundRuleInput.Builder inputBuilder = toInputBuilder(binding);
                 builder.mutableInput(inputBuilder);

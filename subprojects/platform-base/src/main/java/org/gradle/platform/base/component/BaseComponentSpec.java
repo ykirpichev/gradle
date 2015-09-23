@@ -20,7 +20,6 @@ import org.gradle.api.Action;
 import org.gradle.api.Incubating;
 import org.gradle.api.Named;
 import org.gradle.api.Transformer;
-import org.gradle.internal.Actions;
 import org.gradle.internal.reflect.Instantiator;
 import org.gradle.internal.reflect.ObjectInstantiationException;
 import org.gradle.language.base.FunctionalSourceSet;
@@ -119,7 +118,7 @@ public abstract class BaseComponentSpec implements ComponentSpecInternal {
         modelNode = info.modelNode;
         modelNode.addLink(
             ModelCreators.of(
-                modelNode.getPath().child("binaries"), Actions.doNothing())
+                modelNode.getPath().child("binaries"))
                 .descriptor(modelNode.getDescriptor(), ".binaries")
                 .withProjection(
                     ModelMapModelProjection.unmanaged(

@@ -66,7 +66,7 @@ class RuleBindings {
 
     private void bound(Reference reference, ModelNodeInternal node) {
         ModelBinding binding = reference.binding;
-        binding.onCreate(node);
+        binding.onBind(node);
         if (binding.predicate.getState() == null) {
             throw new IllegalArgumentException("No state specified for binding: " + binding);
         }
@@ -76,6 +76,19 @@ class RuleBindings {
     public void remove(ModelNodeInternal node) {
         rulesBySubject.nodeRemoved(node);
         rulesByInput.nodeRemoved(node);
+    }
+
+    public void replace(ModelNodeInternal node) {
+        remove(node, node.getCreatorBinder());
+        for (RuleBinder ruleBinder : node.getInitializerRuleBinders()) {
+            remove(node, ruleBinder);
+        }
+        node.getInitializerRuleBinders().clear();
+    }
+
+    private void remove(ModelNodeInternal node, RuleBinder ruleBinder) {
+        rulesBySubject.remove(node, ruleBinder);
+        rulesByInput.remove(node, ruleBinder);
     }
 
     public void add(RuleBinder ruleBinder) {
@@ -127,9 +140,18 @@ class RuleBindings {
             }
 
             @Override
-            public void onCreate(ModelNodeInternal node) {
+            public void onBind(ModelNodeInternal node) {
             }
         };
+    }
+
+    private static void unbind(RuleBinder rule, ModelNodeInternal node) {
+        if (rule.getSubjectBinding() != null) {
+            rule.getSubjectBinding().onUnbind(node);
+        }
+        for (ModelBinding binding : rule.getInputBindings()) {
+            binding.onUnbind(node);
+        }
     }
 
     /**
@@ -175,13 +197,8 @@ class RuleBindings {
         public void nodeRemoved(ModelNodeInternal node) {
             // This could be more efficient; assume that removal happens much less often than addition
             for (ModelNode.State state : ModelNode.State.values()) {
-                for (RuleBinder rule : boundAtState.removeAll(new NodeAtState(node.getPath(), state))) {
-                    if (rule.getSubjectBinding() != null) {
-                        rule.getSubjectBinding().onRemove(node);
-                    }
-                    for (ModelBinding binding : rule.getInputBindings()) {
-                        binding.onRemove(node);
-                    }
+                for (RuleBinder ruleBinder : boundAtState.removeAll(new NodeAtState(node.getPath(), state))) {
+                    unbind(ruleBinder, node);
                 }
             }
         }
@@ -196,6 +213,11 @@ class RuleBindings {
         public Collection<RuleBinder> get(NodeAtState nodeAtState) {
             Collection<RuleBinder> result = boundAtState.get(nodeAtState);
             return result == null ? Collections.<RuleBinder>emptyList() : result;
+        }
+
+        public void remove(ModelNodeInternal node, RuleBinder ruleBinder) {
+            unbind(ruleBinder, node);
+            boundAtState.values().remove(ruleBinder);
         }
 
         @Override

@@ -18,6 +18,7 @@ package org.gradle.model.internal.registry;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.gradle.api.Nullable;
@@ -40,6 +41,7 @@ abstract class ModelNodeInternal implements MutableModelNode {
     private ModelNode.State state = ModelNode.State.Known;
     private boolean hidden;
     private final List<ModelRuleDescriptor> executedRules = Lists.newArrayList();
+    private final List<InitializerRuleBinder> initializerRuleBinders = Lists.newArrayList();
 
     public ModelNodeInternal(CreatorRuleBinder creatorBinder) {
         this.creatorBinder = creatorBinder;
@@ -47,6 +49,14 @@ abstract class ModelNodeInternal implements MutableModelNode {
 
     public CreatorRuleBinder getCreatorBinder() {
         return creatorBinder;
+    }
+
+    public List<InitializerRuleBinder> getInitializerRuleBinders() {
+        return initializerRuleBinders;
+    }
+
+    public void addInitializerRuleBinder(InitializerRuleBinder binder) {
+        initializerRuleBinders.add(binder);
     }
 
     public void replaceCreatorRuleBinder(CreatorRuleBinder newCreatorBinder) {
@@ -63,12 +73,26 @@ abstract class ModelNodeInternal implements MutableModelNode {
         }
 
         // Can't have different inputs
-        if (!newCreator.getInputs().equals(oldCreator.getInputs())) {
+        Set<ModelReference<?>> newInputs = getInputs(newCreator);
+        Set<ModelReference<?>> oldInputs = getInputs(oldCreator);
+        if (!newInputs.equals(oldInputs)) {
             Joiner joiner = Joiner.on(", ");
-            throw new IllegalStateException("can not replace node " + getPath() + " with creator with different input bindings (old: [" + joiner.join(oldCreator.getInputs()) + "], new: [" + joiner.join(newCreator.getInputs()) + "])");
+            throw new IllegalStateException(String.format("can not replace node %s with creator with different input bindings (old: [%s], new: [%s])",
+                getPath(), joiner.join(oldInputs), joiner.join(newInputs)));
         }
 
         this.creatorBinder = newCreatorBinder;
+    }
+
+    private static Set<ModelReference<?>> getInputs(ModelCreator creator) {
+        ImmutableSet.Builder<ModelReference<?>> builder = ImmutableSet.builder();
+        for (ModelInitializer initializer : creator.getRegistrationActions()) {
+            builder.addAll(initializer.getInputs());
+        }
+        for (ModelInitializer initializer : creator.getCreatorActions()) {
+            builder.addAll(initializer.getInputs());
+        }
+        return builder.build();
     }
 
     @Override

@@ -41,7 +41,7 @@ class PathBinderCreationListener extends ModelBinding {
         return state.compareTo(ModelNode.State.ProjectionsDefined) >= 0;
     }
 
-    public void onCreate(ModelNodeInternal node) {
+    public void onBind(ModelNodeInternal node) {
         if (boundTo != null) {
             throw new IllegalStateException(String.format("Reference %s for %s is already bound to %s.", predicate.getReference(), referrer, boundTo));
         }

@@ -37,7 +37,7 @@ class OneOfTypeBinderCreationListener extends ModelBinding {
         return state.compareTo(ModelNode.State.ProjectionsDefined) >= 0;
     }
 
-    public void onCreate(ModelNodeInternal node) {
+    public void onBind(ModelNodeInternal node) {
         ModelRuleDescriptor creatorDescriptor = node.getDescriptor();
         ModelPath path = node.getPath();
         if (boundTo != null) {

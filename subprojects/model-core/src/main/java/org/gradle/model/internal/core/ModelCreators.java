@@ -27,7 +27,6 @@ import org.gradle.model.internal.core.rule.describe.NestedModelRuleDescriptor;
 import org.gradle.model.internal.core.rule.describe.SimpleModelRuleDescriptor;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -35,20 +34,14 @@ import java.util.List;
 abstract public class ModelCreators {
 
     public static <T> Builder bridgedInstance(ModelReference<T> modelReference, T instance) {
-        return unmanagedInstance(modelReference, Factories.constant(instance), Actions.doNothing());
+        return unmanagedInstance(modelReference, Factories.constant(instance));
     }
 
     public static <T> Builder unmanagedInstance(final ModelReference<T> modelReference, final Factory<? extends T> factory) {
-        return unmanagedInstance(modelReference, factory, Actions.doNothing());
-    }
-
-    public static <T> Builder unmanagedInstance(final ModelReference<T> modelReference, final Factory<? extends T> factory, final Action<? super MutableModelNode> initializer) {
         return unmanagedInstanceOf(modelReference, new Transformer<T, MutableModelNode>() {
             @Override
             public T transform(MutableModelNode modelNode) {
-                T t = factory.create();
-                initializer.execute(modelNode);
-                return t;
+                return factory.create();
             }
         });
     }
@@ -65,26 +58,27 @@ abstract public class ModelCreators {
     }
 
     public static Builder of(ModelPath path) {
-        return new Builder(path, BiActions.doNothing());
+        return new Builder(path);
     }
 
-    public static Builder of(ModelPath path, final NodeInitializer initializer) {
-        return of(path, new BiAction<MutableModelNode, List<ModelView<?>>>() {
-            @Override
-            public void execute(MutableModelNode modelNode, List<ModelView<?>> views) {
-                initializer.execute(modelNode, views);
-            }
-        })
-            .inputs(initializer.getInputs())
+    public static Builder of(ModelPath path, NodeInitializer initializer) {
+        return of(path)
+            .withInitializer(initializer)
             .withProjections(initializer.getProjections());
     }
 
-    public static Builder of(ModelPath path, BiAction<? super MutableModelNode, ? super List<ModelView<?>>> initializer) {
-        return new Builder(path, initializer);
+    public static Builder of(ModelPath path, NodeAction initializer) {
+        return of(path)
+            .withInitializer(initializer);
+    }
+
+    public static Builder of(ModelPath path, ModelInitializer initializer) {
+        return new Builder(path)
+            .onCreate(initializer);
     }
 
     public static Builder of(ModelPath path, Action<? super MutableModelNode> initializer) {
-        return new Builder(path, BiActions.usingFirstArgument(initializer));
+        return new Builder(path).withInitializer(initializer);
     }
 
     public static <T> Builder of(final ModelReference<T> modelReference, final Factory<? extends T> factory) {
@@ -99,7 +93,8 @@ abstract public class ModelCreators {
 
     @NotThreadSafe
     public static class Builder {
-        private final BiAction<? super MutableModelNode, ? super List<ModelView<?>>> initializer;
+        private final List<ModelInitializer> registrationActions = Lists.newArrayList();
+        private final List<ModelInitializer> initializerActions = Lists.newArrayList();
         private final ModelPath path;
         private final List<ModelProjection> projections = new ArrayList<ModelProjection>();
         private final List<Pair<? extends ModelActionRole, ? extends ModelAction<?>>> actions = Lists.newArrayList();
@@ -107,11 +102,9 @@ abstract public class ModelCreators {
         private boolean hidden;
 
         private ModelRuleDescriptor modelRuleDescriptor;
-        private List<? extends ModelReference<?>> inputs = Collections.emptyList();
 
-        private Builder(ModelPath path, BiAction<? super MutableModelNode, ? super List<ModelView<?>>> initializer) {
+        private Builder(ModelPath path) {
             this.path = path;
-            this.initializer = initializer;
         }
 
         public Builder descriptor(String descriptor) {
@@ -139,13 +132,63 @@ abstract public class ModelCreators {
             return this;
         }
 
-        public Builder inputs(List<? extends ModelReference<?>> inputs) {
-            this.inputs = inputs;
+        public Builder withInitializer(final Action<? super MutableModelNode> initializer) {
+            onCreate(new ModelInitializer() {
+                @Override
+                public ModelPath getPath() {
+                    return path;
+                }
+
+                @Override
+                public void execute(MutableModelNode modelNode, List<ModelView<?>> inputs) {
+                    initializer.execute(modelNode);
+                }
+
+                @Override
+                public List<? extends ModelReference<?>> getInputs() {
+                    return Collections.emptyList();
+                }
+
+                @Override
+                public ModelRuleDescriptor getDescriptor() {
+                    return modelRuleDescriptor;
+                }
+            });
             return this;
         }
 
-        public Builder inputs(ModelReference<?>... inputs) {
-            this.inputs = Arrays.asList(inputs);
+        public Builder withInitializer(final NodeAction initializer) {
+            onCreate(new ModelInitializer() {
+                @Override
+                public ModelPath getPath() {
+                    return path;
+                }
+
+                @Override
+                public void execute(MutableModelNode modelNode, List<ModelView<?>> inputs) {
+                    initializer.execute(modelNode, inputs);
+                }
+
+                @Override
+                public List<? extends ModelReference<?>> getInputs() {
+                    return initializer.getInputs();
+                }
+
+                @Override
+                public ModelRuleDescriptor getDescriptor() {
+                    return modelRuleDescriptor;
+                }
+            });
+            return this;
+        }
+
+        public Builder onCreate(ModelInitializer initializer) {
+            this.initializerActions.add(initializer);
+            return this;
+        }
+
+        public Builder onRegistration(ModelInitializer registrationAction) {
+            this.registrationActions.add(registrationAction);
             return this;
         }
 
@@ -167,18 +210,32 @@ abstract public class ModelCreators {
 
         @SuppressWarnings("unchecked")
         public ModelCreator build() {
-            BiAction<? super MutableModelNode, ? super List<ModelView<?>>> effectiveInitializer = initializer;
             if (!actions.isEmpty()) {
-                effectiveInitializer = BiActions.composite(initializer, new BiAction<MutableModelNode, List<ModelView<?>>>() {
+                initializerActions.add(new ModelInitializer() {
                     @Override
-                    public void execute(MutableModelNode modelNode, List<ModelView<?>> modelViews) {
+                    public ModelPath getPath() {
+                        return path;
+                    }
+
+                    @Override
+                    public void execute(MutableModelNode modelNode, List<ModelView<?>> inputs) {
                         for (Pair<? extends ModelActionRole, ? extends ModelAction<?>> action : actions) {
                             modelNode.applyToSelf(action.getLeft(), action.getRight());
                         }
                     }
+
+                    @Override
+                    public List<? extends ModelReference<?>> getInputs() {
+                        return Collections.emptyList();
+                    }
+
+                    @Override
+                    public ModelRuleDescriptor getDescriptor() {
+                        return modelRuleDescriptor;
+                    }
                 });
             }
-            return new ProjectionBackedModelCreator(path, modelRuleDescriptor, ephemeral, hidden, inputs, projections, effectiveInitializer);
+            return new ProjectionBackedModelCreator(path, modelRuleDescriptor, ephemeral, hidden, projections, registrationActions, initializerActions);
         }
 
         public Builder withProjections(Iterable<? extends ModelProjection> projections) {

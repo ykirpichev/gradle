@@ -64,9 +64,9 @@ abstract class ModelBinding {
 
     public abstract boolean canBindInState(ModelNode.State state);
 
-    public abstract void onCreate(ModelNodeInternal node);
+    public abstract void onBind(ModelNodeInternal node);
 
-    public void onRemove(ModelNodeInternal node) {
+    public void onUnbind(ModelNodeInternal node) {
         if (node == boundTo) {
             boundTo = null;
         }

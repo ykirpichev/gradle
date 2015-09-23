@@ -18,7 +18,6 @@ package org.gradle.model.internal.inspect;
 
 import net.jcip.annotations.ThreadSafe;
 import org.gradle.api.specs.Spec;
-import org.gradle.internal.BiAction;
 import org.gradle.model.internal.core.*;
 import org.gradle.model.internal.core.rule.describe.ModelRuleDescriptor;
 import org.gradle.model.internal.type.ModelType;
@@ -45,11 +44,10 @@ public class UnmanagedModelCreationRuleExtractor extends AbstractModelCreationRu
         List<ModelReference<?>> references = ruleDefinition.getReferences();
         ModelRuleDescriptor descriptor = ruleDefinition.getDescriptor();
 
-        BiAction<MutableModelNode, List<ModelView<?>>> transformer = new ModelRuleInvokerBackedTransformer<R>(returnType, ruleDefinition.getRuleInvoker(), descriptor);
+        NodeAction transformer = new ModelRuleInvokerBackedTransformer<R>(returnType, ruleDefinition.getRuleInvoker(), descriptor, references);
         ModelCreator modelCreator = ModelCreators.of(ModelPath.path(modelName), transformer)
                 .withProjection(new UnmanagedModelProjection<R>(returnType, true, true))
                 .descriptor(descriptor)
-                .inputs(references)
                 .build();
 
         return new ExtractedModelCreator(modelCreator);
@@ -59,16 +57,18 @@ public class UnmanagedModelCreationRuleExtractor extends AbstractModelCreationRu
         return String.format("%s and returning a model element", super.getDescription());
     }
 
-    private static class ModelRuleInvokerBackedTransformer<T> implements BiAction<MutableModelNode, List<ModelView<?>>> {
+    private static class ModelRuleInvokerBackedTransformer<T> implements NodeAction {
 
         private final ModelType<T> type;
         private final ModelRuleDescriptor descriptor;
         private final ModelRuleInvoker<T> ruleInvoker;
+        private final List<? extends ModelReference<?>> inputs;
 
-        private ModelRuleInvokerBackedTransformer(ModelType<T> type, ModelRuleInvoker<T> ruleInvoker, ModelRuleDescriptor descriptor) {
+        private ModelRuleInvokerBackedTransformer(ModelType<T> type, ModelRuleInvoker<T> ruleInvoker, ModelRuleDescriptor descriptor, List<? extends ModelReference<?>> inputs) {
             this.type = type;
             this.descriptor = descriptor;
             this.ruleInvoker = ruleInvoker;
+            this.inputs = inputs;
         }
 
         public void execute(MutableModelNode modelNode, List<ModelView<?>> inputs) {
@@ -87,6 +87,11 @@ public class UnmanagedModelCreationRuleExtractor extends AbstractModelCreationRu
                 throw new ModelRuleExecutionException(descriptor, "rule returned null");
             }
             modelNode.setPrivateData(type, instance);
+        }
+
+        @Override
+        public List<? extends ModelReference<?>> getInputs() {
+            return inputs;
         }
     }
 }
