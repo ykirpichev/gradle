@@ -175,7 +175,7 @@ abstract class ModelNodeInternal implements MutableModelNode {
     public void reset() {
         if (isAtLeast(State.Created)) {
             setState(State.ProjectionsDefined);
-            setPrivateData(ModelType.untyped(), null);
+            resetPrivateData();
 
             for (ModelNodeInternal dependent : dependents) {
                 if (LOGGER.isInfoEnabled()) {
@@ -193,6 +193,8 @@ abstract class ModelNodeInternal implements MutableModelNode {
             }
         }
     }
+
+    protected abstract void resetPrivateData();
 
     @Override
     public Optional<String> getValueDescription() {

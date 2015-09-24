@@ -1261,8 +1261,10 @@ foo
     }
 
     def "node can be viewed via projection registered via projector"() {
+        registry.configure(ModelActionRole.DefineProjections) { it.path "foo" descriptor "project" node { node ->
+            node.addProjection UnmanagedModelProjection.of(BeanInternal)
+        } }
         registry
-            .configure(ModelActionRole.DefineProjections, registry.projector("foo").withProjection(UnmanagedModelProjection.of(BeanInternal)).build())
             .create("foo") { it.unmanaged(Bean, new AdvancedBean(name: "foo")) }
             .mutate (BeanInternal) { bean ->
                 bean.internal = "internal"
@@ -1278,11 +1280,13 @@ foo
         registry.create("foo") { it.unmanaged(Bean, new AdvancedBean(name: "foo")) }
 
         when:
-        registry.configure(ModelActionRole.DefineProjections, registry.projector("foo").withProjection(UnmanagedModelProjection.of(BeanInternal)).build())
+        registry.configure(ModelActionRole.DefineProjections) { it.path "foo" descriptor "project" node { node ->
+            node.addProjection UnmanagedModelProjection.of(BeanInternal)
+        } }
 
         then:
         def ex = thrown IllegalStateException
-        ex.message == "Cannot add rule tester for model element 'foo' at state Known as this element is already at state ProjectionsDefined."
+        ex.message == "Cannot add rule project for model element 'foo' at state Known as this element is already at state ProjectionsDefined."
     }
 
     static class Bean {

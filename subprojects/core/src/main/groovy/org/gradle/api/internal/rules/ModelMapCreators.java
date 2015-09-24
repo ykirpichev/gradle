@@ -16,9 +16,13 @@
 
 package org.gradle.api.internal.rules;
 
+import org.gradle.model.ModelMap;
+
 import org.gradle.api.Action;
 import org.gradle.internal.BiAction;
 import org.gradle.model.ModelMap;
+import org.gradle.model.collection.internal.ChildNodeInitializerStrategyAccessor;
+import org.gradle.model.collection.internal.ChildNodeInitializerStrategyAccessors;
 import org.gradle.model.collection.internal.PolymorphicModelMapProjection;
 import org.gradle.model.internal.core.*;
 import org.gradle.model.internal.core.rule.describe.ModelRuleDescriptor;
@@ -32,28 +36,21 @@ public class ModelMapCreators {
                                                                       Class<T> typeClass,
                                                                       Class<C> containerClass,
                                                                       final Class<? extends C> viewClass,
-                                                                      NodeInitializerRegistry nodeInitializerRegistry,
                                                                       ModelRuleDescriptor descriptor) {
-        final ModelType<C> containerType = ModelType.of(containerClass);
+        ModelType<C> containerType = ModelType.of(containerClass);
         final ModelType<T> modelType = ModelType.of(typeClass);
-        return ModelCreators.of(
-            path,
-            new Action<MutableModelNode>() {
-                @Override
-                public void execute(MutableModelNode modelNode) {
-                    modelNode.setPrivateData(containerType, null);
-                }
-            })
-            .action(ModelActionRole.DefineProjections, ModelReference.of(NodeInitializerRegistry.class), new BiAction<MutableModelNode, List<ModelView<?>>>() {
-                @Override
-                public void execute(MutableModelNode node, List<ModelView<?>> modelViews) {
-                    NodeInitializerRegistry nodeInitializerRegistry = (NodeInitializerRegistry) modelViews.get(0).getInstance();
-                    final ChildNodeInitializerStrategy<T> childFactory = NodeBackedModelMap.createUsingRegistry(modelType, nodeInitializerRegistry);
-                    node.addProjection(new SpecializedModelMapProjection<C, T>(containerType, modelType, viewClass, childFactory));
-                    node.addProjection(PolymorphicModelMapProjection.of(modelType, childFactory));
-                }
-            })
+        ChildNodeInitializerStrategyAccessor<T> strategyAccessor = ChildNodeInitializerStrategyAccessors.fromPrivateData();
+        return ModelCreators.of(path, ModelReference.of(NodeInitializerRegistry.class), new BiAction<MutableModelNode, List<ModelView<?>>>() {
+            @Override
+            public void execute(MutableModelNode node, List<ModelView<?>> modelViews) {
+                NodeInitializerRegistry nodeInitializerRegistry = (NodeInitializerRegistry) modelViews.get(0).getInstance();
+                ChildNodeInitializerStrategy<T> childFactory = NodeBackedModelMap.createUsingRegistry(modelType, nodeInitializerRegistry);
+                node.setPrivateData(ModelType.of(ChildNodeInitializerStrategy.class), childFactory);
+            }
+        })
             .descriptor(descriptor)
+            .withProjection(new SpecializedModelMapProjection<C, T>(containerType, modelType, viewClass, strategyAccessor))
+            .withProjection(PolymorphicModelMapProjection.of(modelType, strategyAccessor))
             .build();
     }
 }

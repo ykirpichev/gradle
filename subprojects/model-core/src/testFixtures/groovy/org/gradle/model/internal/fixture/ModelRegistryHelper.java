@@ -16,7 +16,6 @@
 
 package org.gradle.model.internal.fixture;
 
-import com.google.common.collect.Sets;
 import org.gradle.api.Action;
 import org.gradle.api.NamedDomainObjectFactory;
 import org.gradle.api.Nullable;
@@ -28,13 +27,13 @@ import org.gradle.api.internal.rules.RuleAwarePolymorphicNamedEntityInstantiator
 import org.gradle.internal.*;
 import org.gradle.model.ModelMap;
 import org.gradle.model.RuleSource;
+import org.gradle.model.collection.internal.ChildNodeInitializerStrategyAccessors;
 import org.gradle.model.collection.internal.PolymorphicModelMapProjection;
 import org.gradle.model.internal.core.*;
 import org.gradle.model.internal.core.rule.describe.ModelRuleDescriptor;
 import org.gradle.model.internal.core.rule.describe.SimpleModelRuleDescriptor;
 import org.gradle.model.internal.inspect.MethodModelRuleExtractors;
 import org.gradle.model.internal.inspect.ModelRuleExtractor;
-import org.gradle.model.internal.manage.schema.extract.DefaultConstructableTypesRegistry;
 import org.gradle.model.internal.manage.schema.extract.DefaultModelSchemaStore;
 import org.gradle.model.internal.registry.DefaultModelRegistry;
 import org.gradle.model.internal.registry.ModelRegistry;
@@ -61,7 +60,7 @@ public class ModelRegistryHelper implements ModelRegistry {
     private final ModelRegistry modelRegistry;
 
     public ModelRegistryHelper() {
-        this(new DefaultModelRegistry(new ModelRuleExtractor(MethodModelRuleExtractors.coreExtractors(DefaultModelSchemaStore.getInstance(), new DefaultNodeInitializerRegistry(DefaultModelSchemaStore.getInstance(), new DefaultConstructableTypesRegistry())))));
+        this(new DefaultModelRegistry(new ModelRuleExtractor(MethodModelRuleExtractors.coreExtractors(DefaultModelSchemaStore.getInstance()))));
     }
 
     public ModelRegistryHelper(ModelRegistryScope modelRegistryScope) {
@@ -268,14 +267,6 @@ public class ModelRegistryHelper implements ModelRegistry {
 
     public ModelCreatorBuilder creator(ModelPath path) {
         return new ModelCreatorBuilder(path);
-    }
-
-    public ModelProjectorBuilder projector(String path) {
-        return projector(ModelPath.path(path));
-    }
-
-    public ModelProjectorBuilder projector(ModelPath path) {
-        return new ModelProjectorBuilder(path);
     }
 
     public ModelRegistryHelper configure(ModelActionRole role, Transformer<? extends ModelAction, ? super ModelActionBuilder<Object>> def) {
@@ -618,39 +609,14 @@ public class ModelRegistryHelper implements ModelRegistry {
                     }
                 }
             )
-                .withProjection(PolymorphicModelMapProjection.of(modelType, NodeBackedModelMap.createUsingParentNode(modelType)))
+                .withProjection(PolymorphicModelMapProjection.of(
+                    modelType,
+                    ChildNodeInitializerStrategyAccessors.constant(NodeBackedModelMap.createUsingParentNode(modelType)))
+                )
                 .withProjection(UnmanagedModelProjection.of(instantiatorType))
                 .descriptor(descriptor)
                 .ephemeral(ephemeral)
                 .build();
-        }
-    }
-
-    public static class ModelProjectorBuilder {
-        private final ModelPath path;
-        private final Set<ModelProjection> projections = Sets.newLinkedHashSet();
-        private ModelRuleDescriptor descriptor = new SimpleModelRuleDescriptor("tester");
-
-        public ModelProjectorBuilder(ModelPath path) {
-            this.path = path;
-        }
-
-        public ModelProjectorBuilder withProjection(ModelProjection projection) {
-            projections.add(projection);
-            return this;
-        }
-
-        public ModelProjectorBuilder descriptor(String descriptor) {
-            return descriptor(new SimpleModelRuleDescriptor(descriptor));
-        }
-
-        public ModelProjectorBuilder descriptor(ModelRuleDescriptor descriptor) {
-            this.descriptor = descriptor;
-            return this;
-        }
-
-        public ModelAction build() {
-            return new DefaultModelProjector(path, descriptor, projections);
         }
     }
 

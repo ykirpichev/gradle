@@ -609,6 +609,12 @@ public class DefaultModelRegistry implements ModelRegistry {
             this.privateData = object;
         }
 
+        @Override
+        protected void resetPrivateData() {
+            this.privateDataType = null;
+            this.privateData = null;
+        }
+
         public boolean hasLink(String name) {
             return links.containsKey(name);
         }
