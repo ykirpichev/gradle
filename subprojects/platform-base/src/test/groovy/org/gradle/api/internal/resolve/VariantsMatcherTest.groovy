@@ -20,6 +20,7 @@ import org.gradle.api.Named
 import org.gradle.language.base.internal.model.DefaultVariantDimensionSelectorFactory
 import org.gradle.language.base.internal.model.DefaultVariantsMetaData
 import org.gradle.language.base.internal.model.VariantDimensionSelector
+import org.gradle.model.internal.manage.schema.extract.DefaultConstructableTypesRegistry
 import org.gradle.model.internal.manage.schema.extract.DefaultModelSchemaStore
 import org.gradle.model.internal.manage.schema.extract.ModelSchemaAspectExtractor
 import org.gradle.model.internal.manage.schema.extract.ModelSchemaExtractor
@@ -31,7 +32,7 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 class VariantsMatcherTest extends Specification {
-    def schemaStore = new DefaultModelSchemaStore(new ModelSchemaExtractor([], new ModelSchemaAspectExtractor([new VariantAspectExtractionStrategy()])))
+    def schemaStore = new DefaultModelSchemaStore(new ModelSchemaExtractor([], new ModelSchemaAspectExtractor([new VariantAspectExtractionStrategy()]), new DefaultConstructableTypesRegistry()))
 
     @Unroll
     def "should filter binaries based on requirements"() {

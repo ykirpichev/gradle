@@ -43,15 +43,16 @@ public class ModelSchemaExtractor {
     private final List<? extends ModelSchemaExtractionStrategy> strategies;
 
     public ModelSchemaExtractor() {
-        this(Collections.<ModelSchemaExtractionStrategy>emptyList(), new ModelSchemaAspectExtractor());
+        this(Collections.<ModelSchemaExtractionStrategy>emptyList(), new ModelSchemaAspectExtractor(), new DefaultConstructableTypesRegistry());
     }
 
-    public ModelSchemaExtractor(List<? extends ModelSchemaExtractionStrategy> strategies, ModelSchemaAspectExtractor aspectExtractor) {
+    public ModelSchemaExtractor(List<? extends ModelSchemaExtractionStrategy> strategies, ModelSchemaAspectExtractor aspectExtractor, ConstructableTypesRegistry constructableTypesRegistry) {
         this.strategies = ImmutableList.<ModelSchemaExtractionStrategy>builder()
             .addAll(strategies)
             .add(new PrimitiveStrategy())
             .add(new EnumStrategy())
             .add(new JdkValueTypeStrategy())
+            .add(new ConstructableTypesStrategy(constructableTypesRegistry))
             .add(new ModelSetStrategy())
             .add(new ManagedSetStrategy())
             .add(new SpecializedMapStrategy())

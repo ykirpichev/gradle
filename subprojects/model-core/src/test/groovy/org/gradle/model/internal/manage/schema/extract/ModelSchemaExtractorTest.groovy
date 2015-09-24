@@ -15,6 +15,7 @@
  */
 
 package org.gradle.model.internal.manage.schema.extract
+
 import org.gradle.api.Action
 import org.gradle.internal.reflect.MethodDescription
 import org.gradle.model.Managed
@@ -853,7 +854,7 @@ $type
     private void fail(extractType, errorType, String msgPattern) {
         try {
             extract(extractType)
-            throw new AssertionError("schema extraction from ${getName(extractType)} should failed with message: $msgPattern")
+            throw new AssertionError("schema extraction from ${getName(extractType)} should have failed with message: \n $msgPattern")
         } catch (InvalidManagedModelElementTypeException e) {
             assert e.message.startsWith("Invalid managed model type ${getName(errorType)}: ")
             assert e.message =~ msgPattern
@@ -951,7 +952,7 @@ interface Managed${typeName} {
                 }
             }
         }
-        def extractor = new ModelSchemaExtractor([strategy], new ModelSchemaAspectExtractor())
+        def extractor = new ModelSchemaExtractor([strategy], new ModelSchemaAspectExtractor(), new DefaultConstructableTypesRegistry())
         def store = new DefaultModelSchemaStore(extractor)
 
         then:
@@ -961,7 +962,7 @@ interface Managed${typeName} {
 
     def "custom strategy can register dependency on other type"() {
         def strategy = Mock(ModelSchemaExtractionStrategy)
-        def extractor = new ModelSchemaExtractor([strategy], new ModelSchemaAspectExtractor())
+        def extractor = new ModelSchemaExtractor([strategy], new ModelSchemaAspectExtractor(), new DefaultConstructableTypesRegistry())
         def store = new DefaultModelSchemaStore(extractor)
 
         when:
@@ -984,7 +985,7 @@ interface Managed${typeName} {
     def "validator is invoked after all dependencies have been visited"() {
         def strategy = Mock(ModelSchemaExtractionStrategy)
         def validator = Mock(Action)
-        def extractor = new ModelSchemaExtractor([strategy], new ModelSchemaAspectExtractor())
+        def extractor = new ModelSchemaExtractor([strategy], new ModelSchemaAspectExtractor(), new DefaultConstructableTypesRegistry())
         def store = new DefaultModelSchemaStore(extractor)
 
         when:
@@ -1027,6 +1028,7 @@ interface Managed${typeName} {
 
     static class SimpleUnmanagedType {
         String prop
+
         String getCalculatedProp() {
             "calc"
         }
@@ -1067,7 +1069,7 @@ interface Managed${typeName} {
 
         then:
         assert schema instanceof ModelUnmanagedImplStructSchema
-        schema.properties*.name == ["buildable","time", "unmanagedCalculatedProp", "unmanagedProp"]
+        schema.properties*.name == ["buildable", "time", "unmanagedCalculatedProp", "unmanagedProp"]
 
         schema.getProperty("unmanagedProp").stateManagementType == UNMANAGED
         schema.getProperty("unmanagedProp").isWritable() == true
@@ -1111,7 +1113,7 @@ interface Managed${typeName} {
     def "properties are extracted from unmanaged type with managed super-type"() {
         def extractor = new ModelSchemaExtractor([
             new TestUnmanagedTypeWithManagedSuperTypeExtractionStrategy(UnmanagedSuperType)
-        ], new ModelSchemaAspectExtractor())
+        ], new ModelSchemaAspectExtractor(), new DefaultConstructableTypesRegistry())
         def store = new DefaultModelSchemaStore(extractor)
 
         when:
@@ -1201,7 +1203,9 @@ interface Managed${typeName} {
     @Managed
     static abstract class MyTypeOfAspect {
         abstract String getProp()
+
         abstract void setProp(String prop)
+
         String getCalculatedProp() {
             return "calc"
         }
@@ -1210,7 +1214,7 @@ interface Managed${typeName} {
     def "aspects can be extracted"() {
         def aspect = new MyAspect()
         def aspectExtractionStrategy = Mock(ModelSchemaAspectExtractionStrategy)
-        def extractor = new ModelSchemaExtractor([], new ModelSchemaAspectExtractor([aspectExtractionStrategy]))
+        def extractor = new ModelSchemaExtractor([], new ModelSchemaAspectExtractor([aspectExtractionStrategy]), new DefaultConstructableTypesRegistry())
         def store = new DefaultModelSchemaStore(extractor)
 
         when:
@@ -1267,7 +1271,7 @@ interface Managed${typeName} {
         schema instanceof ManagedImplModelSchema
         def redundant = schema.properties[0]
         assert redundant instanceof ModelProperty
-        redundant.getters.size()==2
+        redundant.getters.size() == 2
     }
 
     @Managed
@@ -1283,12 +1287,14 @@ interface Managed${typeName} {
     @Managed
     interface IsNotAllowedForOtherTypeThanBoolean {
         String isThing()
+
         void setThing(String thing)
     }
 
     @Managed
     interface IsNotAllowedForOtherTypeThanBooleanWithBoxedBoolean {
         Boolean isThing()
+
         void setThing(Boolean thing)
     }
 
@@ -1349,6 +1355,7 @@ interface Managed${typeName} {
     @Managed
     interface HasIsAndGetPropertyWithDifferentTypes {
         boolean isValue()
+
         String getValue()
     }
 

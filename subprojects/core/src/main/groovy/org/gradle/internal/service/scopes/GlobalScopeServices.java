@@ -228,9 +228,9 @@ public class GlobalScopeServices {
         return new ModelSchemaAspectExtractor(strategies);
     }
 
-    protected ModelSchemaExtractor createModelSchemaExtractor(ModelSchemaAspectExtractor aspectExtractor, ServiceRegistry serviceRegistry) {
+    protected ModelSchemaExtractor createModelSchemaExtractor(ModelSchemaAspectExtractor aspectExtractor, ServiceRegistry serviceRegistry, ConstructableTypesRegistry constructableTypesRegistry) {
         List<ModelSchemaExtractionStrategy> strategies = serviceRegistry.getAll(ModelSchemaExtractionStrategy.class);
-        return new ModelSchemaExtractor(strategies, aspectExtractor);
+        return new ModelSchemaExtractor(strategies, aspectExtractor, constructableTypesRegistry);
     }
 
     protected InstanceFactoryRegistry createInstanceFactoryRegistry() {

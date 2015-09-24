@@ -210,9 +210,9 @@ public abstract class ManagedImplStructSchemaExtractionStrategySupport extends S
                     return;
                 }
 
+                boolean isConstructable = ConstructableTypeSchema.isConstructable(propertySchema);
                 // Only managed implementation and value types are allowed as a managed property type unless marked with @Unmanaged
-                boolean isAllowedPropertyTypeOfManagedType = propertySchema instanceof ManagedImplModelSchema
-                    || propertySchema instanceof ModelValueSchema;
+                boolean isAllowedPropertyTypeOfManagedType = isConstructable || propertySchema instanceof ModelValueSchema;
                 boolean isDeclaredAsHavingUnmanagedType = propertyResult.getGetter().isAnnotationPresent(Unmanaged.class);
 
                 if (isAllowedPropertyTypeOfManagedType && isDeclaredAsHavingUnmanagedType) {
@@ -246,7 +246,7 @@ public abstract class ManagedImplStructSchemaExtractionStrategySupport extends S
                         );
                     }
 
-                    if (!(propertySchema instanceof ManagedImplModelSchema)) {
+                    if (!isConstructable) {
                         throw new InvalidManagedModelElementTypeException(parentContext, String.format(
                             "read only property '%s' has non managed type %s, only managed types can be used",
                             property.getName(), property.getType()));
@@ -274,7 +274,7 @@ public abstract class ManagedImplStructSchemaExtractionStrategySupport extends S
                                 "property '%s' cannot have a setter (%s properties must be read only).",
                                 property.getName(), property.getType().toString()));
                         }
-                        if (!(elementTypeSchema instanceof ManagedImplModelSchema)) {
+                        if (!ConstructableTypeSchema.isConstructable(elementTypeSchema)) {
                             throw new InvalidManagedModelElementTypeException(parentContext, String.format(
                                 "property '%s' cannot be a model map of type %s as it is not a %s type.",
                                 property.getName(), elementType, Managed.class.getName()

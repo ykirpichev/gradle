@@ -15,6 +15,7 @@
  */
 
 package org.gradle.language.base
+
 import org.gradle.api.reporting.model.ModelReportOutput
 import org.gradle.integtests.fixtures.AbstractIntegrationSpec
 import org.gradle.platform.base.internal.registry.LanguageTypeModelRuleExtractor
@@ -100,5 +101,49 @@ class FunctionalSourceSetIntegrationTest extends AbstractIntegrationSpec {
         modelNode.functionalSources.@creator[0] == "model.functionalSources"
         modelNode.functionalSources.@type[0] == "org.gradle.language.base.FunctionalSourceSet"
         modelNode.functionalSources.@nodeValue[0] == "source set 'functionalSources'"
+    }
+
+    def "can define a FunctionalSourceSet property and managed ollection element"() {
+        buildFile << """
+        apply plugin: 'language-base'
+
+        @Managed
+        interface BuildType {
+            FunctionalSourceSet getSources()
+
+            FunctionalSourceSet getInputs()
+            void setInputs(FunctionalSourceSet sources)
+
+            ModelMap<FunctionalSourceSet> getComponentSources()
+            ModelSet<FunctionalSourceSet> getTestSources()
+        }
+
+        class Rules extends RuleSource {
+            @Model
+            void buildType(BuildType buildType) {}
+
+            @Mutate void createHelloTask(ModelMap<Task> tasks, BuildType buildType) {
+                tasks.create("echo") {
+                  doLast {
+                    println "sources: \${buildType.sources}"
+                    println "inputs: \${buildType.inputs}"
+                    println "componentSources: \${buildType.componentSources}"
+                    println "testSources: \${buildType.testSources}"
+                  }
+                }
+            }
+        }
+
+        apply plugin: Rules
+        """
+        expect:
+        succeeds "echo"
+
+        and:
+        output.contains "sources: null"
+        output.contains "inputs: null"
+        output.contains "componentSources: ModelMap<FunctionalSourceSet> 'buildType.componentSources'"
+        output.contains "testSources: []"
+
     }
 }

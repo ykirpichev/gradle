@@ -15,6 +15,7 @@
  */
 
 package org.gradle.platform.base.internal.registry
+
 import org.gradle.language.base.internal.model.BinarySpecFactoryRegistry
 import org.gradle.language.base.internal.testinterfaces.NotBinarySpec
 import org.gradle.language.base.internal.testinterfaces.SomeBinarySpec
@@ -22,6 +23,7 @@ import org.gradle.language.base.plugins.ComponentModelBasePlugin
 import org.gradle.model.InvalidModelRuleDeclarationException
 import org.gradle.model.Managed
 import org.gradle.model.internal.core.*
+import org.gradle.model.internal.manage.schema.extract.DefaultConstructableTypesRegistry
 import org.gradle.model.internal.manage.schema.extract.DefaultModelSchemaStore
 import org.gradle.model.internal.manage.schema.extract.ModelSchemaAspectExtractor
 import org.gradle.model.internal.manage.schema.extract.ModelSchemaExtractor
@@ -41,7 +43,7 @@ class BinaryTypeModelRuleExtractorTest extends AbstractAnnotationModelRuleExtrac
         new DefaultModelSchemaStore(
             new ModelSchemaExtractor([
                 new BinarySpecSpecializationSchemaExtractionStrategy(aspectExtractor)
-            ], aspectExtractor)
+            ], aspectExtractor, new DefaultConstructableTypesRegistry())
         )
     )
 

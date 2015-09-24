@@ -39,6 +39,7 @@ import org.gradle.jvm.platform.internal.DefaultJavaPlatform
 import org.gradle.language.base.internal.model.DefaultVariantDimensionSelectorFactory
 import org.gradle.language.base.internal.model.VariantsMetaData
 import org.gradle.model.ModelMap
+import org.gradle.model.internal.manage.schema.extract.DefaultConstructableTypesRegistry
 import org.gradle.model.internal.manage.schema.extract.DefaultModelSchemaStore
 import org.gradle.model.internal.manage.schema.extract.ModelSchemaAspectExtractor
 import org.gradle.model.internal.manage.schema.extract.ModelSchemaExtractor
@@ -77,7 +78,7 @@ class JvmLocalLibraryDependencyResolverTest extends Specification {
         variants.nonNullDimensions >> ['targetPlatform']
         variants.allDimensions >> ['targetPlatform']
         variants.getDimensionType(_) >> ModelType.of(JavaPlatform)
-        def schemaStore = new DefaultModelSchemaStore(new ModelSchemaExtractor([], new ModelSchemaAspectExtractor([new VariantAspectExtractionStrategy()])))
+        def schemaStore = new DefaultModelSchemaStore(new ModelSchemaExtractor([], new ModelSchemaAspectExtractor([new VariantAspectExtractionStrategy()]), new DefaultConstructableTypesRegistry()))
         resolver = new JvmLocalLibraryDependencyResolver(projectModelResolver, variants, [DefaultVariantDimensionSelectorFactory.of(JavaPlatform, new DefaultJavaPlatformVariantDimensionSelector())], schemaStore)
         metadata = Mock(DependencyMetaData)
         selector = Mock(LibraryComponentSelector)
