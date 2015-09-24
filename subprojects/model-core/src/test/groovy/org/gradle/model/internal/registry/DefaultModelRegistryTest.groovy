@@ -238,7 +238,8 @@ class DefaultModelRegistryTest extends Specification {
         def target = registry.node("target")
         registry.create("ref") { parentBuilder ->
             parentBuilder.unmanagedNode(Object) { node ->
-                node.addReference(registry.creator("ref.direct").unmanagedNode(String, {}))
+                def refDirectCreator = registry.creator("ref.direct").descriptor("ref.direct creator").unmanagedNode(String, {})
+                node.addReference(refDirectCreator)
                 node.getLink("direct").setTarget(target)
             }
         }
@@ -252,7 +253,7 @@ class DefaultModelRegistryTest extends Specification {
         given:
         registry.create("parent") { parentBuilder ->
             parentBuilder.unmanagedNode(Object) { node ->
-                node.addLink(registry.creator("parent.child").unmanaged(String, "value"))
+                node.addLink(registry.creator("parent.child").descriptor("parent.child creator").unmanaged(String, "value"))
             }
         }
 

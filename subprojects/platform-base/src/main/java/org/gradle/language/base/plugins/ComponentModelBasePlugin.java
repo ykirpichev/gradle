@@ -73,6 +73,13 @@ public class ComponentModelBasePlugin implements Plugin<ProjectInternal> {
 
         SimpleModelRuleDescriptor descriptor = new SimpleModelRuleDescriptor(ComponentModelBasePlugin.class.getSimpleName() + ".apply()");
 
+        modelRegistry.create(ModelCreators.bridgedInstance(
+            ModelReference.of("nodeInitializerRegistry", NodeInitializerRegistry.class), nodeInitializerRegistry)
+            .descriptor(descriptor)
+            .ephemeral(true)
+            .hidden(true)
+            .build());
+
         SpecializedMapSchema<ComponentSpecContainer> schema = (SpecializedMapSchema<ComponentSpecContainer>) schemaStore.getSchema(ModelType.of(ComponentSpecContainer.class));
         ModelPath components = ModelPath.path("components");
         ModelCreator componentsCreator = ModelMapCreators.specialized(
@@ -188,11 +195,6 @@ public class ComponentModelBasePlugin implements Plugin<ProjectInternal> {
                 instanceFactoryRegistry.register(type, ModelReference.of(ComponentSpecFactory.class));
             }
             return instanceFactoryRegistry;
-        }
-
-        @Model
-        NodeInitializerRegistry nodeInitializerRegistry(ServiceRegistry serviceRegistry, InstanceFactoryRegistry instanceFactoryRegistry) {
-            return serviceRegistry.get(NodeInitializerRegistry.class);
         }
 
         @Defaults
