@@ -71,7 +71,7 @@ abstract public class ModelCreators {
         return new Builder(path);
     }
 
-    public static Builder of(final ModelPath path, final NodeInitializer initializer) {
+    public static Builder of(ModelPath path, NodeInitializer initializer) {
         return of(path)
             .action(ModelActionRole.Create, initializer)
             .withProjections(initializer.getProjections());
