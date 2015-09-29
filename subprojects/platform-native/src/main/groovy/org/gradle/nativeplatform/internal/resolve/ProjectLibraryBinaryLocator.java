@@ -42,12 +42,22 @@ public class ProjectLibraryBinaryLocator implements LibraryBinaryLocator {
         ModelRegistry projectModel = findProject(requirement);
         ComponentSpecContainer components = projectModel.find(ModelPath.path("components"), ModelType.of(ComponentSpecContainer.class));
         if (components == null) {
-            throw new LibraryResolveException(String.format("Project does not have a libraries container: '%s'", requirement.getProjectPath()));
+            throw new LibraryResolveException(String.format("Project does not have a libraries container: '%s'", requirement.getProjectPath())) {
+                @Override
+                public synchronized Throwable fillInStackTrace() {
+                    return this;
+                }
+            };
         }
         String libraryName = requirement.getLibraryName();
         NativeLibrarySpec library = components.withType(NativeLibrarySpec.class).get(libraryName);
         if (library == null) {
-            throw new UnknownDomainObjectException(String.format("%s with name '%s' not found.", NativeLibrarySpec.class.getSimpleName(), libraryName));
+            throw new UnknownDomainObjectException(String.format("%s with name '%s' not found.", NativeLibrarySpec.class.getSimpleName(), libraryName)) {
+                @Override
+                public synchronized Throwable fillInStackTrace() {
+                    return this;
+                }
+            };
         }
         ModelMap<NativeBinarySpec> projectBinaries = library.getBinaries().withType(NativeBinarySpec.class);
         DomainObjectSet<NativeLibraryBinary> binaries = new DefaultDomainObjectSet<NativeLibraryBinary>(NativeLibraryBinary.class);

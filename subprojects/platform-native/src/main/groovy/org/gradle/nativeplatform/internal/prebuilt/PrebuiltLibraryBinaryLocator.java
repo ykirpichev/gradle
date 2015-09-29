@@ -39,7 +39,12 @@ public class PrebuiltLibraryBinaryLocator implements LibraryBinaryLocator {
         ModelRegistry projectModel = projectModelResolver.resolveProjectModel(requirement.getProjectPath());
         NamedDomainObjectSet<PrebuiltLibraries> repositories = projectModel.realize(ModelPath.path("repositories"), ModelType.of(Repositories.class)).withType(PrebuiltLibraries.class);
         if (repositories.isEmpty()) {
-            throw new PrebuiltLibraryResolveException("Project does not have any prebuilt library repositories.");
+            throw new PrebuiltLibraryResolveException("Project does not have any prebuilt library repositories.") {
+                @Override
+                public synchronized Throwable fillInStackTrace() {
+                    return this;
+                }
+            };
         }
         PrebuiltLibrary prebuiltLibrary = getPrebuiltLibrary(repositories, requirement.getLibraryName());
         return prebuiltLibrary.getBinaries();
@@ -55,6 +60,11 @@ public class PrebuiltLibraryBinaryLocator implements LibraryBinaryLocator {
             }
         }
         throw new PrebuiltLibraryResolveException(
-                String.format("Prebuilt library with name '%s' not found in repositories '%s'.", libraryName, repositoryNames));
+            String.format("Prebuilt library with name '%s' not found in repositories '%s'.", libraryName, repositoryNames)) {
+            @Override
+            public synchronized Throwable fillInStackTrace() {
+                return this;
+            }
+        };
     }
 }
