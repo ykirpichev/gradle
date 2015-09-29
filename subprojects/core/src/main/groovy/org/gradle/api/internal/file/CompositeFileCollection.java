@@ -39,11 +39,19 @@ import java.util.*;
  */
 public abstract class CompositeFileCollection extends AbstractFileCollection implements FileCollectionContainer, TaskDependencyContainer {
     public Set<File> getFiles() {
-        Set<File> files = new LinkedHashSet<File>();
+        List<Set<File>> fileSets = new LinkedList<Set<File>>();
+        int fileCount = 0;
         for (FileCollection collection : getSourceCollections()) {
-            files.addAll(collection.getFiles());
+            final Set<File> files = collection.getFiles();
+            fileCount += files.size();
+            fileSets.add(files);
         }
-        return files;
+        // calculate total size of files to prevent expensive hash bucket overflow handling
+        Set<File> allFiles = new LinkedHashSet<File>(fileCount);
+        for (Set<File> fileSet : fileSets) {
+            allFiles.addAll(fileSet);
+        }
+        return allFiles;
     }
 
     @Override
